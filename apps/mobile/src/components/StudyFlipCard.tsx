@@ -11,11 +11,11 @@ import {
   Vibration,
   View,
 } from "react-native";
-import * as Speech from "expo-speech";
 import type { MobileWordEntry } from "../data/mobileLexicon";
 import type { VocabPalette } from "../theme/palettes";
 import { getThemeVisual } from "../theme/themesConfig";
 import { playUiSound } from "../utils/soundEffects";
+import { speakPtBr } from "../utils/speechPtBr";
 import { AppIcon } from "./AppIcon";
 import { EtymologyNetwork } from "./EtymologyNetwork";
 
@@ -42,7 +42,7 @@ export function StudyFlipCard({
 }: Props) {
   const [flipped, setFlipped] = useState(false);
   const [speaking, setSpeaking] = useState(false);
-  const [speechRate, setSpeechRate] = useState<0.85 | 1.0>(0.9 as 0.85);
+  const [speechRate, setSpeechRate] = useState<0.85 | 1.0>(1.0);
   const [ttsNotice, setTtsNotice] = useState<string | null>(null);
   const [flipAnim] = useState(() => new Animated.Value(0));
   const [dragTilt] = useState(() => new Animated.Value(0));
@@ -86,7 +86,8 @@ export function StudyFlipCard({
   const [swipeResponder] = useState(() =>
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gesture) =>
-        Math.abs(gesture.dx) > 16 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.2,
+        Math.abs(gesture.dx) > 20 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.6,
+      onPanResponderTerminationRequest: () => true,
       onPanResponderMove: (_, gesture) => {
         const clamped = Math.max(-120, Math.min(120, gesture.dx));
         dragTilt.setValue(clamped);
@@ -107,27 +108,16 @@ export function StudyFlipCard({
     Vibration.vibrate(6);
     onAudioTracked?.();
     setTtsNotice(null);
-    try {
-      await Speech.stop();
-      const voices = await Speech.getAvailableVoicesAsync().catch(() => []);
-      const ptVoice = voices.find((v) => v.language.toLowerCase().startsWith("pt"));
-      setSpeaking(true);
-      Speech.speak(text, {
-        language: ptVoice?.language ?? "pt-BR",
-        voice: ptVoice?.identifier,
-        rate: speechRate,
-        onDone: () => setSpeaking(false),
-        onStopped: () => setSpeaking(false),
-        onError: () => {
-          setSpeaking(false);
-          playUiSound("save", soundEnabled);
-          setTtsNotice("Voz PT-BR indisponível neste dispositivo — confira pelo IPA.");
-        },
-      });
-    } catch {
-      setSpeaking(false);
-      setTtsNotice("Áudio de voz indisponível neste dispositivo.");
-    }
+    await speakPtBr(text, {
+      rate: speechRate,
+      onStart: () => setSpeaking(true),
+      onDone: () => setSpeaking(false),
+      onError: () => {
+        setSpeaking(false);
+        playUiSound("save", soundEnabled);
+        setTtsNotice("Voz PT-BR indisponível neste dispositivo — confira pelo IPA.");
+      },
+    });
   }
 
   const themeVis = getThemeVisual(word.theme);
@@ -272,8 +262,13 @@ export function StudyFlipCard({
               <Text style={[styles.hintText, { color: palette.muted }]}>Voltar ↻</Text>
             </Pressable>
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.backScroll}>
-              <Pressable onPress={toggleFlip} style={{ gap: 12 }}>
+            <ScrollView
+              nestedScrollEnabled
+              showsVerticalScrollIndicator={false}
+              style={{ flex: 1, marginTop: 8 }}
+              contentContainerStyle={{ paddingBottom: 16 }}
+            >
+              <View style={{ gap: 12 }}>
                 <View
                   style={[
                     styles.quoteBox,
@@ -342,7 +337,7 @@ export function StudyFlipCard({
                     </Text>
                   ))}
                 </View>
-              </Pressable>
+              </View>
             </ScrollView>
           </View>
         </Animated.View>
@@ -362,7 +357,7 @@ export function StudyFlipCard({
 
 const styles = StyleSheet.create({
   wrapper: { gap: 12 },
-  cardStage: { height: 390, position: "relative" },
+  cardStage: { height: 410, position: "relative" },
   face: {
     position: "absolute",
     inset: 0,
@@ -374,7 +369,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
-    elevation: 3,
   },
   faceInner: { flex: 1, justifyContent: "space-between" },
   topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
