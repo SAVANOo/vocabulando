@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+.expo/
+.next/
+apps/mobile/android/
+data/*.db
+data/logs/
+*.db
+*.db-shm
+*.db-wal
+test-results/
+playwright-report/
+.env
+.env.local
+coverage/
