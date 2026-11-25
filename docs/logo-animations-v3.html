@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vocabulando — Evolução v3 (Livro Real de Ensino + Folhas + Card V)</title>
+  <style>
+    :root {
+      --bg: #f6f3ec;
+      --surface: #ffffff;
+      --surface-2: #ede8dd;
+      --border: #dfd8ca;
+      --text: #1c1b18;
+      --muted: #656056;
+      --sage: #246a52;
+      --sage-2: #358a6c;
+      --sage-3: #83bfa8;
+      --gold: #d69e4e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 2rem;
+      min-height: 100vh;
+      transition: background 0.25s, color 0.25s;
+    }
+    header {
+      max-width: 1120px;
+      margin: 0 auto 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .eyebrow {
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 0.4rem;
+    }
+    h1 { font-family: Georgia, serif; font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 600; }
+    .grid {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+    .concept {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.04);
+    }
+    .stage {
+      height: 235px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .brand-word {
+      font-family: Georgia, serif;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+      color: var(--sage);
+      margin-top: 8px;
+      opacity: 0;
+      animation: wordIn 0.55s ease 1.25s forwards;
+    }
+    @keyframes wordIn {
+      from { opacity: 0; transform: translateY(6px); letter-spacing: 0.18em; }
+      to { opacity: 1; transform: translateY(0); letter-spacing: 0.08em; }
+    }
+    .btn {
+      background: var(--sage);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.55rem 1rem;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+    .btn.secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .desc { color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
+
+    /* Shared strokes */
+    .cal-1 { stroke-dasharray: 95; stroke-dashoffset: 95; animation: drawLine 0.42s ease 0.6s forwards; }
+    .cal-2 { stroke-dasharray: 95; stroke-dashoffset: 95; animation: drawLine 0.42s ease 0.95s forwards; }
+    .pop-dot { opacity: 0; animation: popDot 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 1.25s forwards; }
+    @keyframes drawLine { to { stroke-dashoffset: 0; } }
+    @keyframes popDot { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; transform: scale(1); } }
+
+    /* === I: Dicionário Vivo (Livro Aberto com Lombada, Linhas & Marcador) === */
+    .i-cover { animation: popIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; transform-origin: 90px 110px; }
+    .i-page-l1 { transform-origin: 90px 104px; animation: iOpenL1 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both; }
+    .i-page-l2 { transform-origin: 90px 104px; animation: iOpenL2 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both; }
+    .i-page-r1 { transform-origin: 90px 104px; animation: iOpenR1 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both; }
+    .i-page-r2 { transform-origin: 90px 104px; animation: iOpenR2 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both; }
+    .i-ribbon { transform-origin: 90px 24px; animation: ribbonDrop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s both; }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.85) translateY(14px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes iOpenL1 { from { opacity: 0; transform: rotate(20deg) scaleX(0.6); } to { opacity: 1; transform: rotate(0deg) scaleX(1); } }
+    @keyframes iOpenL2 { from { opacity: 0; transform: rotate(12deg) scaleX(0.7); } to { opacity: 1; transform: rotate(0deg) scaleX(1); } }
+    @keyframes iOpenR1 { from { opacity: 0; transform: rotate(-20deg) scaleX(0.6); } to { opacity: 1; transform: rotate(0deg) scaleX(1); } }
+    @keyframes iOpenR2 { from { opacity: 0; transform: rotate(-12deg) scaleX(0.7); } to { opacity: 1; transform: rotate(0deg) scaleX(1); } }
+    @keyframes ribbonDrop { from { opacity: 0; transform: scaleY(0); } to { opacity: 1; transform: scaleY(1); } }
+
+    /* === J: Caderno/Livro Moleskine + Folhas em Leque + V === */
+    .j-wrap { position: relative; width: 96px; height: 120px; }
+    .j-leaf {
+      position: absolute; inset: 4px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+    }
+    .jl-1 { animation: jl1 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+    .jl-2 { animation: jl2 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both; }
+    .jr-1 { animation: jr1 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+    .jr-2 { animation: jr2 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both; }
+    @keyframes jl1 { from { opacity: 0; } to { opacity: 0.7; transform: translate(-28px, 4px) rotate(-15deg); } }
+    @keyframes jl2 { from { opacity: 0; } to { opacity: 0.9; transform: translate(-14px, 2px) rotate(-7deg); } }
+    @keyframes jr1 { from { opacity: 0; } to { opacity: 0.7; transform: translate(28px, 4px) rotate(15deg); } }
+    @keyframes jr2 { from { opacity: 0; } to { opacity: 0.9; transform: translate(14px, 2px) rotate(7deg); } }
+    .j-book {
+      position: absolute; inset: 0;
+      border-radius: 6px 14px 14px 6px;
+      background: var(--sage);
+      border-left: 10px solid #184938;
+      box-shadow: 0 14px 28px rgba(36,106,82,0.26);
+      display: flex; align-items: center; justify-content: center;
+      animation: popIn 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .j-bookmark {
+      position: absolute; bottom: -10px; right: 16px;
+      width: 14px; height: 24px;
+      background: var(--gold);
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+      animation: ribbonDrop 0.45s ease 0.5s both;
+    }
+
+    /* === K: Páginas de Verbete Espalhando + Caligrafia V === */
+    .k-page { transform-origin: 85px 110px; opacity: 0; }
+    .kp-l1 { animation: kpL1 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards; }
+    .kp-l2 { animation: kpL2 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.18s forwards; }
+    .kp-r1 { animation: kpR1 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards; }
+    .kp-r2 { animation: kpR2 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.18s forwards; }
+    @keyframes kpL1 { from { opacity: 0; transform: rotate(22deg) scale(0.75); } to { opacity: 0.55; transform: rotate(-28deg) scale(1); } }
+    @keyframes kpL2 { from { opacity: 0; transform: rotate(14deg) scale(0.8); } to { opacity: 0.9; transform: rotate(-12deg) scale(1); } }
+    @keyframes kpR1 { from { opacity: 0; transform: rotate(-22deg) scale(0.75); } to { opacity: 0.55; transform: rotate(28deg) scale(1); } }
+    @keyframes kpR2 { from { opacity: 0; transform: rotate(-14deg) scale(0.8); } to { opacity: 0.9; transform: rotate(12deg) scale(1); } }
+
+    /* === L: Livro Aberto + Card Central Destacado com V === */
+    .l-card {
+      animation: popIn 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s both;
+      transform-origin: center;
+    }
+
+    @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="eyebrow">Evolução v3 • Livro Real de Ensino + Folhas + Card V</div>
+      <h1>4 Variações com Identidade de Livro &amp; Estudo</h1>
+    </div>
+    <button class="btn secondary" onclick="toggleMode()">Alternar Dia / Noite</button>
+  </header>
+
+  <section class="grid">
+    <!-- I -->
+    <article class="concept">
+      <div class="stage" id="stageI">
+        <svg width="180" height="128" viewBox="0 0 180 128" fill="none">
+          <!-- Capa do livro aberto -->
+          <rect class="i-cover" x="22" y="24" width="136" height="86" rx="8" fill="var(--sage)"/>
+          <!-- Páginas em leque esquerda/direita com linhas de texto -->
+          <path class="i-page-l1" d="M90 104 L28 96 L28 28 L90 36 Z" fill="var(--surface-2)" stroke="var(--border)"/>
+          <path class="i-page-r1" d="M90 104 L152 96 L152 28 L90 36 Z" fill="var(--surface-2)" stroke="var(--border)"/>
+          <g class="i-page-l2">
+            <path d="M90 104 L34 90 L34 22 L90 34 Z" fill="var(--surface)" stroke="var(--border)"/>
+            <line x1="44" y1="42" x2="78" y2="47" stroke="var(--border)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="44" y1="54" x2="74" y2="58" stroke="var(--border)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="44" y1="66" x2="78" y2="70" stroke="var(--border)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <g class="i-page-r2">
+            <path d="M90 104 L146 90 L146 22 L90 34 Z" fill="var(--surface)" stroke="var(--border)"/>
+            <line x1="102" y1="47" x2="136" y2="42" stroke="var(--border)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="102" y1="58" x2="132" y2="54" stroke="var(--border)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="102" y1="70" x2="136" y2="66" stroke="var(--border)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <!-- Marcador dourado -->
+          <polygon class="i-ribbon" points="86,28 94,28 94,116 90,108 86,116" fill="var(--gold)"/>
+          <!-- V caligráfico -->
+          <path class="cal-1" d="M62 34 L90 88" stroke="var(--sage)" stroke-width="8" stroke-linecap="round"/>
+          <path class="cal-2" d="M90 88 L118 38" stroke="var(--sage-2)" stroke-width="5" stroke-linecap="round"/>
+          <circle class="pop-dot" cx="118" cy="27" r="4.5" fill="var(--gold)"/>
+        </svg>
+        <div class="brand-word">Vocabulando</div>
+      </div>
+      <h3>I. Dicionário Vivo (Livro Aberto + Linhas + Marcador + V)</h3>
+      <p class="desc">Livro aberto com capa sálvia, páginas pautadas se abrindo em camadas, marcador de fita dourado e o "V" caligráfico escrito sobre as páginas.</p>
+      <button class="btn" onclick="replay('stageI')">Rever I</button>
+    </article>
+
+    <!-- J -->
+    <article class="concept">
+      <div class="stage" id="stageJ">
+        <div class="j-wrap">
+          <div class="j-leaf jl-1"></div>
+          <div class="j-leaf jr-1"></div>
+          <div class="j-leaf jl-2"></div>
+          <div class="j-leaf jr-2"></div>
+          <div class="j-book">
+            <div class="j-bookmark"></div>
+            <svg width="58" height="58" viewBox="0 0 80 80" fill="none">
+              <path class="cal-1" d="M18 20 L40 62" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+              <path class="cal-2" d="M40 62 L62 22" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+              <circle class="pop-dot" cx="62" cy="14" r="4.5" fill="var(--gold)"/>
+            </svg>
+          </div>
+        </div>
+        <div class="brand-word">Vocabulando</div>
+      </div>
+      <h3>J. Caderno Moleskine + Folhas + Marcador (Evolução de F)</h3>
+      <p class="desc">O card central ganha lombada de livro/caderno e marcador dourado na base, com 4 páginas se espalhando em leque atrás dele.</p>
+      <button class="btn" onclick="replay('stageJ')">Rever J</button>
+    </article>
+
+    <!-- K -->
+    <article class="concept">
+      <div class="stage" id="stageK">
+        <svg width="170" height="128" viewBox="0 0 170 128" fill="none">
+          <!-- Páginas de verbete espalhadas -->
+          <g class="k-page kp-l1">
+            <rect x="61" y="24" width="48" height="76" rx="7" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+          </g>
+          <g class="k-page kp-r1">
+            <rect x="61" y="24" width="48" height="76" rx="7" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+          </g>
+          <g class="k-page kp-l2">
+            <rect x="61" y="24" width="48" height="76" rx="7" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+            <line x1="70" y1="42" x2="98" y2="42" stroke="var(--border)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="70" y1="53" x2="94" y2="53" stroke="var(--border)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <g class="k-page kp-r2">
+            <rect x="61" y="24" width="48" height="76" rx="7" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+            <line x1="70" y1="42" x2="98" y2="42" stroke="var(--border)" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="70" y1="53" x2="94" y2="53" stroke="var(--border)" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+          <!-- V caligráfico sálvia e dourado -->
+          <path class="cal-1" d="M53 32 L85 96" stroke="var(--sage)" stroke-width="9" stroke-linecap="round"/>
+          <path class="cal-2" d="M85 96 L117 36" stroke="var(--gold)" stroke-width="5.5" stroke-linecap="round"/>
+          <circle class="pop-dot" cx="117" cy="25" r="5" fill="var(--sage)"/>
+        </svg>
+        <div class="brand-word">Vocabulando</div>
+      </div>
+      <h3>K. Páginas de Verbete em Leque + V (Evolução de E)</h3>
+      <p class="desc">As folhas em leque viram páginas de estudo com linhas tipográficas reais, unindo a leveza do leque (E) ao universo de dicionário/ensino.</p>
+      <button class="btn" onclick="replay('stageK')">Rever K</button>
+    </article>
+
+    <!-- L -->
+    <article class="concept">
+      <div class="stage" id="stageL">
+        <svg width="180" height="128" viewBox="0 0 180 128" fill="none">
+          <!-- Livro aberto na base -->
+          <path class="i-page-l1" d="M90 108 L26 98 L26 32 L90 42 Z" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+          <path class="i-page-r1" d="M90 108 L154 98 L154 32 L90 42 Z" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1.5"/>
+          <path class="i-page-l2" d="M90 108 L36 92 L36 26 L90 38 Z" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <path class="i-page-r2" d="M90 108 L144 92 L144 26 L90 38 Z" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <!-- Card de estudo central que emerge do livro -->
+          <g class="l-card">
+            <rect x="62" y="18" width="56" height="76" rx="12" fill="var(--sage)" stroke="var(--gold)" stroke-width="2"/>
+            <path class="cal-1" d="M74 36 L90 68" stroke="#ffffff" stroke-width="6.5" stroke-linecap="round"/>
+            <path class="cal-2" d="M90 68 L106 38" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+            <circle class="pop-dot" cx="106" cy="29" r="3.5" fill="var(--gold)"/>
+          </g>
+        </svg>
+        <div class="brand-word">Vocabulando</div>
+      </div>
+      <h3>L. Livro Aberto → Card de Estudo V (Fusão Completa)</h3>
+      <p class="desc">As páginas do livro se abrem na base e o Card de Estudo emerge do centro com o "V" caligráfico — conectando livro, ensino e flashcard.</p>
+      <button class="btn" onclick="replay('stageL')">Rever L</button>
+    </article>
+  </section>
+
+  <script>
+    let dark = false;
+    function replay(id) {
+      const el = document.getElementById(id);
+      const html = el.innerHTML;
+      el.innerHTML = '';
+      requestAnimationFrame(() => { el.innerHTML = html; });
+    }
+    function toggleMode() {
+      dark = !dark;
+      const r = document.documentElement.style;
+      if (dark) {
+        r.setProperty('--bg', '#13161c'); r.setProperty('--surface', '#1b1f28');
+        r.setProperty('--surface-2', '#232834'); r.setProperty('--border', '#2f3545');
+        r.setProperty('--text', '#efede8'); r.setProperty('--muted', '#9ea5b3');
+        r.setProperty('--sage', '#67b897'); r.setProperty('--sage-2', '#82cca9');
+      } else {
+        r.setProperty('--bg', '#f6f3ec'); r.setProperty('--surface', '#ffffff');
+        r.setProperty('--surface-2', '#ede8dd'); r.setProperty('--border', '#dfd8ca');
+        r.setProperty('--text', '#1c1b18'); r.setProperty('--muted', '#656056');
+        r.setProperty('--sage', '#246a52'); r.setProperty('--sage-2', '#358a6c');
+      }
+    }
+  </script>
+</body>
+</html>

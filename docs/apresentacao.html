@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vocabulando — Visão de Produto, Arquitetura & Engenharia</title>
+  <style>
+    :root {
+      --bg: #0c0d10;
+      --surface: #14161c;
+      --surface-2: #1c1f28;
+      --border: #2a2e3b;
+      --text: #f3f1ec;
+      --muted: #a1a6b3;
+      --accent: #e8b86d;
+      --accent-soft: rgba(232, 184, 109, 0.14);
+      --green: #58c98f;
+      --blue: #6aa9ff;
+      --red: #ff7b7b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--surface-2);
+      width: 100%;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #f5d69b);
+      transition: width 0.3s ease;
+    }
+
+    .deck {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 4rem;
+    }
+
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1120px;
+      animation: fadeIn 0.28s ease;
+    }
+    .slide.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .eyebrow {
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+      font-weight: 600;
+    }
+
+    h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    p.lead {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      color: var(--muted);
+      max-width: 780px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.35rem 1.5rem;
+    }
+
+    .card.highlight {
+      border-color: rgba(232, 184, 109, 0.5);
+      background: linear-gradient(180deg, rgba(232, 184, 109, 0.08), var(--surface));
+    }
+
+    ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      color: var(--muted);
+      font-size: 0.96rem;
+      line-height: 1.45;
+    }
+
+    li strong { color: var(--text); }
+
+    .tag {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--accent-soft);
+      color: var(--accent);
+      margin-right: 0.4rem;
+      margin-bottom: 0.5rem;
+    }
+    .tag.green { background: rgba(88, 201, 143, 0.14); color: var(--green); }
+    .tag.blue { background: rgba(106, 169, 255, 0.14); color: var(--blue); }
+    .tag.red { background: rgba(255, 123, 123, 0.14); color: var(--red); }
+
+    .arch-box {
+      background: var(--surface-2);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      color: #d6dbe6;
+      white-space: pre;
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    .word-preview {
+      margin-top: 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 14px;
+      padding: 1.5rem 2rem;
+      max-width: 680px;
+    }
+    .word-preview .word {
+      font-family: Georgia, serif;
+      font-size: 2rem;
+      color: var(--text);
+    }
+    .word-preview .meta {
+      color: var(--accent);
+      font-size: 0.9rem;
+      margin: 0.25rem 0 0.75rem;
+    }
+    .word-preview .def {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    button {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.45rem 0.9rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    button:hover {
+      border-color: var(--accent);
+      background: rgba(232, 184, 109, 0.1);
+    }
+
+    @media (max-width: 860px) {
+      .deck { padding: 1.5rem; overflow-y: auto; align-items: flex-start; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+  <main class="deck">
+    <!-- Slide 1 -->
+    <section class="slide active">
+      <div class="eyebrow">Visão de Produto &amp; Arquitetura EdTech</div>
+      <h1>Vocabulando</h1>
+      <p class="lead">
+        Unindo a leveza visual da leitura editorial minimalista com a retenção baseada em ciência cognitiva e gamificação gentil.
+      </p>
+      <div class="word-preview">
+        <div class="word">eloquência <span style="font-size:1rem;color:var(--muted)">/e.loˈkwẽ.sjɐ/</span></div>
+        <div class="meta">substantivo feminino • latim <em>eloquentia</em> (falar com clareza)</div>
+        <div class="def">Capacidade de se expressar com fluência, precisão e poder de persuasão — sem perder a naturalidade.</div>
+      </div>
+    </section>
+
+    <!-- Slide 2 -->
+    <section class="slide">
+      <div class="eyebrow">Etapa 1 • Benchmark &amp; Investigação</div>
+      <h2>O que aprendemos com os líderes</h2>
+      <div class="grid-2">
+        <div class="card">
+          <span class="tag blue">Leitura Editorial</span>
+          <h3>Pontos Fortes vs. Armadilhas do Mercado</h3>
+          <ul>
+            <li><strong>Acerto:</strong> Feed vertical estilo TikTok, estética minimalista, áudio e widgets de tela de bloqueio.</li>
+            <li><strong style="color:var(--red)">Dor 1:</strong> Paywall agressivo logo após o onboarding (sensação de "falso gratuito").</li>
+            <li><strong style="color:var(--red)">Dor 2:</strong> Bugs crônicos em widgets (tela preta / sem atualização).</li>
+            <li><strong style="color:var(--red)">Dor 3:</strong> Excesso de palavras raras/poéticas e zero retenção ativa (lê e esquece).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="tag green">Ciência Cognitiva</span>
+          <h3>Retenção sem Fadiga Cognitiva</h3>
+          <ul>
+            <li><strong>Ofensivas (Streaks):</strong> Aversão à perda + <em>Streak Freeze</em> evita abandono por culpa.</li>
+            <li><strong>Repetição Espaçada (SRS):</strong> Revisão de palavras fracas com baixo esforço.</li>
+            <li><strong>Adaptação Vocabulando:</strong> Meta diária leve (3 palavras ou 1 micro-quiz &lt; 45s), sem ligas estressantes nem punição por erro.</li>
+            <li><strong>Notificações:</strong> Curiosidade intelectual em vez de culpa.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 3 -->
+    <section class="slide">
+      <div class="eyebrow">Etapa 1 • Lacunas de Mercado</div>
+      <h2>Onde os concorrentes falham — e onde vencemos</h2>
+      <div class="grid-3">
+        <div class="card highlight">
+          <span class="tag">Diferencial 1</span>
+          <h3>Etimologia Visual</h3>
+          <ul>
+            <li>Conexão visual de radicais gregos e latinos.</li>
+            <li>Aprender 1 raiz ajuda a decifrar dezenas de palavras novas.</li>
+          </ul>
+        </div>
+        <div class="card highlight">
+          <span class="tag">Diferencial 2</span>
+          <h3>Nuance &amp; Registro</h3>
+          <ul>
+            <li>Sinônimos explicados por contexto: <em>Coloquial × Executivo × Literário</em>.</li>
+            <li>Aplicação prática em reuniões, redação e argumentação.</li>
+          </ul>
+        </div>
+        <div class="card highlight">
+          <span class="tag">Diferencial 3</span>
+          <h3>IA Contextual (V2)</h3>
+          <ul>
+            <li>Exemplos gerados no universo do usuário (área de atuação/interesses).</li>
+            <li>Mini-desafio de escrita ativa validando uso real da palavra.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4 -->
+    <section class="slide">
+      <div class="eyebrow">Etapa 2 • Roadmap de Produto</div>
+      <h2>Escopo Evolutivo: MVP vs. V2</h2>
+      <div class="grid-2">
+        <div class="card">
+          <span class="tag green">Fase 1 — MVP (v1.0)</span>
+          <h3>Hábito Passivo + Fixação Básica</h3>
+          <ul>
+            <li><strong>Onboarding rápido (&le; 4 passos):</strong> sem paywall bloqueante.</li>
+            <li><strong>Feed vertical minimalista:</strong> 60 FPS, haptic feedback e etimologia resumida.</li>
+            <li><strong>Curadoria por trilhas e níveis:</strong> Carreira, Redação, Literário, Essencial Culto.</li>
+            <li><strong>Áudio com cache offline</strong> + fallback TTS.</li>
+            <li><strong>Favoritos, coleções e micro-quizzes</strong> contextuais.</li>
+            <li><strong>Notificações inteligentes</strong> no horário escolhido.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="tag">Fase 2 — V2 (Crescimento)</span>
+          <h3>Retenção Profunda, Widgets &amp; IA</h3>
+          <ul>
+            <li><strong>Widgets Nativos (iOS/Android):</strong> cache local de 7–14 dias (zero tela preta).</li>
+            <li><strong>Ofensivas (Streaks) + Escudo:</strong> consistência sem ansiedade.</li>
+            <li><strong>Motor SRS (FSRS/SM-2):</strong> revisão inteligente de palavras salvas/erradas.</li>
+            <li><strong>Modo "Palavra no Contexto":</strong> exemplos e prática ativa via IA.</li>
+            <li><strong>Plataforma Web:</strong> sincronização em tempo real com o mobile.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 5 -->
+    <section class="slide">
+      <div class="eyebrow">Etapa 2 • Estratégia Técnica</div>
+      <h2>Mobile Nativo-First + Expansão Web</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Por que nascer Mobile Nativo?</h3>
+          <ul>
+            <li><strong>Widgets (WidgetKit / Glance):</strong> presença na tela de bloqueio e inicial.</li>
+            <li><strong>Haptic Feedback &amp; Áudio:</strong> sensação tátil e resposta imediata.</li>
+            <li><strong>Offline-First real:</strong> SQLite local garante uso no metrô/avião.</li>
+            <li><strong>Stack recomendada:</strong> React Native (TS) + módulos nativos Swift/Kotlin para Widgets.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Como escalar para Web sem reescrever</h3>
+          <ul>
+            <li><strong>Monorepo compartilhado:</strong> <code>packages/domain</code> (SRS, Streak, Zod) usado no Mobile e no Next.js Web.</li>
+            <li><strong>Sincronização por eventos idempotentes:</strong> cada ação gera um <code>event_id</code> (UUID) com timestamp.</li>
+            <li><strong>Backend:</strong> Fastify (TS) + PostgreSQL (<code>pg_trgm</code> + <code>pgvector</code>) + Redis + CDN.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="arch-box">Mobile (SQLite + Widgets Nativos) ──┐
+                                    ├──► API Gateway (Eventos Idempotentes) ──► PostgreSQL + Redis + CDN
+Web App (Next.js + IndexedDB) ──────┘</div>
+    </section>
+
+    <!-- Slide 6 -->
+    <section class="slide">
+      <div class="eyebrow">Pilares Inegociáveis</div>
+      <h2>Segurança &amp; Qualidade by Design</h2>
+      <div class="grid-2">
+        <div class="card">
+          <span class="tag red">Segurança</span>
+          <h3>Proteção em Todas as Camadas</h3>
+          <ul>
+            <li><strong>Validação estrita:</strong> schemas Zod em todas as rotas; zero confiança em payload externo.</li>
+            <li><strong>Hardening:</strong> CORS restritivo, headers defensivos, rate limiting (IA/Auth) e proteção SSRF.</li>
+            <li><strong>Privacidade LGPD:</strong> zero segredos no repo, tokens em Keychain/Keystore e dados de IA não usados para treino público.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="tag green">Qualidade</span>
+          <h3>Pirâmide de Testes Obrigatória</h3>
+          <ul>
+            <li><strong>Estático:</strong> <code>oxlint</code> (0 erros/warnings) + <code>tsc</code> estrito.</li>
+            <li><strong>Unitários:</strong> domínio puro (SRS, streaks, segurança) em milissegundos.</li>
+            <li><strong>API:</strong> <code>smoke</code> (leitura) + <code>verify</code> (integração ponta a ponta).</li>
+            <li><strong>E2E Isolado:</strong> Playwright contra banco temporário (<code>VOCAB_DB_PATH</code>).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7 -->
+    <section class="slide">
+      <div class="eyebrow">Cultura de Engenharia</div>
+      <h2>Melhoria Contínua &amp; Transparência</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Kanban Vivo</h3>
+          <ul>
+            <li>Roteiro em <code>docs/kanban.md</code>.</li>
+            <li>Cartões pequenos, resultado observável e <strong>commits atômicos verificáveis</strong>.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Explicações Exaustivas</h3>
+          <ul>
+            <li>Toda entrega documenta o <em>porquê</em>, trade-offs, riscos mitigados e passo a passo de teste.</li>
+            <li>Script <code>doctor</code> valida saúde do ambiente.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Backlog Exploratório</h3>
+          <ul>
+            <li>Registro contínuo em <code>docs/backlog-exploratorio.md</code>.</li>
+            <li>Telemetria de retenção SRS retroalimenta novas hipóteses de produto.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8 -->
+    <section class="slide">
+      <div class="eyebrow">Próximos Passos</div>
+      <h2>Ciclo 1: Pronto para Construir</h2>
+      <p class="lead">
+        A fundação documental está criada no repositório. O próximo passo é executar o Ciclo 1 do Kanban com commits pequenos e verificados:
+      </p>
+      <div class="grid-2" style="margin-top:1.5rem">
+        <div class="card highlight">
+          <h3>1. Setup &amp; Esteira</h3>
+          <ul>
+            <li>Monorepo TypeScript + <code>oxlint</code> + <code>tsc</code> + runner de testes + script <code>doctor</code>.</li>
+          </ul>
+        </div>
+        <div class="card highlight">
+          <h3>2. Domínio Puro &amp; SQLite</h3>
+          <ul>
+            <li>Motor SRS, cálculo de ofensiva, fila de eventos idempotentes e suíte unitária 100% verde.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div id="counter">Slide 1 de 8</div>
+    <div class="controls">
+      <button id="prev">← Anterior</button>
+      <button id="next">Próximo →</button>
+      <button id="fs">Tela cheia</button>
+    </div>
+  </footer>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const progress = document.getElementById("progress");
+    const counter = document.getElementById("counter");
+    let current = 0;
+
+    function render(index) {
+      current = Math.max(0, Math.min(slides.length - 1, index));
+      slides.forEach((s, i) => s.classList.toggle("active", i === current));
+      const pct = ((current + 1) / slides.length) * 100;
+      progress.style.width = `${pct}%`;
+      counter.textContent = `Slide ${current + 1} de ${slides.length}  •  Use as setas ← →`;
+    }
+
+    document.getElementById("prev").addEventListener("click", () => render(current - 1));
+    document.getElementById("next").addEventListener("click", () => render(current + 1));
+    document.getElementById("fs").addEventListener("click", () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") render(current + 1);
+      if (e.key === "ArrowLeft" || e.key === "PageUp") render(current - 1);
+    });
+
+    render(0);
+  </script>
+</body>
+</html>

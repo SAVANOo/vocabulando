@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vocabulando — Evolução v2 (Folhas Espalhando + Caligrafia + Card)</title>
+  <style>
+    :root {
+      --bg: #f6f3ec;
+      --surface: #ffffff;
+      --surface-2: #ede8dd;
+      --border: #dfd8ca;
+      --text: #1c1b18;
+      --muted: #656056;
+      --sage: #246a52;
+      --sage-2: #358a6c;
+      --sage-3: #83bfa8;
+      --gold: #d69e4e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 2rem;
+      min-height: 100vh;
+      transition: background 0.25s, color 0.25s;
+    }
+    header {
+      max-width: 1120px;
+      margin: 0 auto 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .eyebrow {
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 0.4rem;
+    }
+    h1 { font-family: Georgia, serif; font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 600; }
+    .grid {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+    .concept {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.04);
+    }
+    .stage {
+      height: 230px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .brand-word {
+      font-family: Georgia, serif;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+      color: var(--sage);
+      margin-top: 8px;
+      opacity: 0;
+      animation: wordIn 0.55s ease 1.25s forwards;
+    }
+    @keyframes wordIn {
+      from { opacity: 0; transform: translateY(6px); letter-spacing: 0.18em; }
+      to { opacity: 1; transform: translateY(0); letter-spacing: 0.08em; }
+    }
+    .btn {
+      background: var(--sage);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.55rem 1rem;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+    .btn.secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .desc { color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
+
+    /* === E: Cascata de 6 Folhas Espalhando + V Caligráfico === */
+    .leaf { transform-origin: 80px 104px; opacity: 0; }
+    .l1 { animation: spreadL3 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards; }
+    .l2 { animation: spreadL2 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards; }
+    .l3 { animation: spreadL1 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.19s forwards; }
+    .r1 { animation: spreadR1 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.19s forwards; }
+    .r2 { animation: spreadR2 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards; }
+    .r3 { animation: spreadR3 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards; }
+    @keyframes spreadL3 { from { transform: rotate(28deg) scale(0.7); opacity: 0; } to { transform: rotate(-34deg) scale(1); opacity: 0.25; } }
+    @keyframes spreadL2 { from { transform: rotate(22deg) scale(0.75); opacity: 0; } to { transform: rotate(-20deg) scale(1); opacity: 0.45; } }
+    @keyframes spreadL1 { from { transform: rotate(15deg) scale(0.8); opacity: 0; } to { transform: rotate(-6deg) scale(1); opacity: 0.72; } }
+    @keyframes spreadR1 { from { transform: rotate(-15deg) scale(0.8); opacity: 0; } to { transform: rotate(6deg) scale(1); opacity: 0.72; } }
+    @keyframes spreadR2 { from { transform: rotate(-22deg) scale(0.75); opacity: 0; } to { transform: rotate(20deg) scale(1); opacity: 0.45; } }
+    @keyframes spreadR3 { from { transform: rotate(-28deg) scale(0.7); opacity: 0; } to { transform: rotate(34deg) scale(1); opacity: 0.25; } }
+
+    .cal-stroke-1 { stroke-dasharray: 90; stroke-dashoffset: 90; animation: drawLine 0.42s ease 0.55s forwards; }
+    .cal-stroke-2 { stroke-dasharray: 90; stroke-dashoffset: 90; animation: drawLine 0.42s ease 0.92s forwards; }
+    .cal-dot-gold { opacity: 0; transform-origin: 112px 24px; animation: popDot 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 1.25s forwards; }
+    @keyframes drawLine { to { stroke-dashoffset: 0; } }
+    @keyframes popDot { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+
+    /* === F: Card Central + Folhas Atrás + Caligrafia V === */
+    .f-wrap { position: relative; width: 92px; height: 116px; }
+    .f-sheet {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    }
+    .fs-1 { animation: fs1 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+    .fs-2 { animation: fs2 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both; }
+    .fs-3 { animation: fs3 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+    .fs-4 { animation: fs4 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both; }
+    .f-main {
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      background: var(--sage);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 14px 28px rgba(36, 106, 82, 0.25);
+      animation: mainCardIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes fs1 { from { opacity: 0; transform: scale(0.8); } to { opacity: 0.55; transform: translate(-34px, 6px) rotate(-18deg); } }
+    @keyframes fs2 { from { opacity: 0; transform: scale(0.8); } to { opacity: 0.8; transform: translate(-18px, 3px) rotate(-9deg); } }
+    @keyframes fs3 { from { opacity: 0; transform: scale(0.8); } to { opacity: 0.55; transform: translate(34px, 6px) rotate(18deg); } }
+    @keyframes fs4 { from { opacity: 0; transform: scale(0.8); } to { opacity: 0.8; transform: translate(18px, 3px) rotate(9deg); } }
+    @keyframes mainCardIn { from { opacity: 0; transform: translateY(20px) scale(0.82); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    /* === G: Folheando Rápido -> Converge no Card V === */
+    .flip-leaf {
+      position: absolute;
+      width: 78px;
+      height: 102px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      transform-origin: left center;
+      opacity: 0;
+    }
+    .fl-1 { animation: flipPass 0.7s ease 0.05s forwards; }
+    .fl-2 { animation: flipPass 0.7s ease 0.18s forwards; }
+    .fl-3 { animation: flipPass 0.7s ease 0.31s forwards; }
+    .fl-final {
+      position: relative;
+      width: 84px;
+      height: 108px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 2px solid var(--sage);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 26px rgba(0,0,0,0.08);
+      opacity: 0;
+      animation: finalCardPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.65s forwards;
+    }
+    @keyframes flipPass {
+      0% { opacity: 0; transform: translateX(-28px) rotate(-16deg) scale(0.9); }
+      45% { opacity: 0.95; transform: translateX(0) rotate(0deg) scale(1); }
+      100% { opacity: 0; transform: translateX(36px) rotate(16deg) scale(0.88); }
+    }
+    @keyframes finalCardPop {
+      from { opacity: 0; transform: scale(0.82) rotateY(35deg); }
+      to { opacity: 1; transform: scale(1) rotateY(0deg); }
+    }
+
+    /* === H: Selo Editorial com Abas de Folha + V Dourado === */
+    .h-card {
+      position: relative;
+      width: 90px;
+      height: 114px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 26px rgba(0,0,0,0.07);
+      animation: mainCardIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .h-wing-l {
+      position: absolute; left: -18px; top: 14px; bottom: 14px; width: 22px;
+      border-radius: 10px 0 0 10px;
+      background: var(--sage-3);
+      opacity: 0;
+      animation: wingL 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
+    }
+    .h-wing-r {
+      position: absolute; right: -18px; top: 14px; bottom: 14px; width: 22px;
+      border-radius: 0 10px 10px 0;
+      background: var(--sage-3);
+      opacity: 0;
+      animation: wingR 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
+    }
+    @keyframes wingL { from { opacity: 0; transform: translateX(16px); } to { opacity: 0.55; transform: translateX(0); } }
+    @keyframes wingR { from { opacity: 0; transform: translateX(-16px); } to { opacity: 0.55; transform: translateX(0); } }
+
+    @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="eyebrow">Evolução v2 • Folhas Espalhando + Caligrafia + Card</div>
+      <h1>4 Novas Variações Combinadas</h1>
+    </div>
+    <button class="btn secondary" onclick="toggleMode()">Alternar Dia / Noite</button>
+  </header>
+
+  <section class="grid">
+    <!-- E -->
+    <article class="concept">
+      <div class="stage" id="stageE">
+        <svg width="160" height="122" viewBox="0 0 160 122" fill="none">
+          <path class="leaf l1" d="M80 104 C62 84, 34 72, 22 30 C46 38, 66 60, 80 104 Z" fill="var(--sage-3)"/>
+          <path class="leaf l2" d="M80 104 C62 84, 34 72, 22 30 C46 38, 66 60, 80 104 Z" fill="var(--sage-2)"/>
+          <path class="leaf l3" d="M80 104 C62 84, 34 72, 22 30 C46 38, 66 60, 80 104 Z" fill="var(--sage)"/>
+          <path class="leaf r3" d="M80 104 C98 84, 126 72, 138 30 C114 38, 94 60, 80 104 Z" fill="var(--sage-3)"/>
+          <path class="leaf r2" d="M80 104 C98 84, 126 72, 138 30 C114 38, 94 60, 80 104 Z" fill="var(--sage-2)"/>
+          <path class="leaf r1" d="M80 104 C98 84, 126 72, 138 30 C114 38, 94 60, 80 104 Z" fill="var(--sage)"/>
+          <path class="cal-stroke-1" d="M48 30 L80 94" stroke="var(--gold)" stroke-width="9" stroke-linecap="round"/>
+          <path class="cal-stroke-2" d="M80 94 L112 34" stroke="var(--gold)" stroke-width="5.5" stroke-linecap="round"/>
+          <circle class="cal-dot-gold" cx="112" cy="24" r="5" fill="var(--gold)"/>
+        </svg>
+        <div class="brand-word">Vocabulando</div>
+      </div>
+      <h3>E. Cascata de 6 Folhas + Caligrafia V (Fusão A + B)</h3>
+      <p class="desc">Seis folhas se espalham em leque em camadas progressivas enquanto a caligrafia dourada desenha o "V" vivo no centro.</p>
+      <button class="btn" onclick="replay('stageE')">Rever E</button>
+    </article>
+
+    <!-- F -->
+    <article class="concept">
+      <div class="stage" id="stageF">
+        <div class="f-wrap">
+          <div class="f-sheet fs-1"></div>
+          <div class="f-sheet fs-3"></div>
+          <div class="f-sheet fs-2"></div>
+          <div class="f-sheet fs-4"></div>
+          <div class="f-main">
+            <svg width="64" height="64" viewBox="0 0 80 80" fill="none">
+              <path class="cal-stroke-1" d="M18 20 L40 62" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+              <path class="cal-stroke-2" d="M40 62 L62 22" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+              <circle cx="62" cy="14" r="4.5" fill="var(--gold)"/>
+            </svg>
+          </div>
+        </div>
+        <div class="brand-word">Vocabulando</div>
+      </div>
+      <h3>F. Card Central + 4 Folhas Espalhando + V (Fusão B + D)</h3>
+      <p class="desc">Quatro folhas de papel se abrem em leque atrás do card principal verde-sálvia, e o "V" caligráfico é escrito na frente do card.</p>
+      <button class="btn" onclick="replay('stageF')">Rever F</button>
+    </article>
+
+    <!-- G -->
+    <article class="concept">
+      <div class="stage" id="stageG">
+        <div class="flip-leaf fl-1"></div>
+        <div class="flip-leaf fl-2"></div>
+        <div class="flip-leaf fl-3"></div>
+        <div class="fl-final">
+          <svg width="56" height="56" viewBox="0 0 80 80" fill="none">
+            <path class="cal-stroke-1" d="M18 20 L40 62" stroke="var(--sage)" stroke-width="8" stroke-linecap="round"/>
+            <path class="cal-stroke-2" d="M40 62 L62 22" stroke="var(--sage-2)" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="62" cy="14" r="4.5" fill="var(--gold)"/>
+          </svg>
+        </div>
+        <div class="brand-word">Vocabulando</div>
+      </div>
+      <h3>G. Folheando Páginas → Converge em Card V</h3>
+      <p class="desc">Folhas passam rapidamente como quem procura uma palavra no livro e pousam no card final com o V caligráfico.</p>
+      <button class="btn" onclick="replay('stageG')">Rever G</button>
+    </article>
+
+    <!-- H -->
+    <article class="concept">
+      <div class="stage" id="stageH">
+        <div class="h-card">
+          <div class="h-wing-l"></div>
+          <div class="h-wing-r"></div>
+          <svg width="58" height="58" viewBox="0 0 80 80" fill="none">
+            <path class="cal-stroke-1" d="M18 20 L40 62" stroke="var(--gold)" stroke-width="8" stroke-linecap="round"/>
+            <path class="cal-stroke-2" d="M40 62 L62 22" stroke="var(--sage)" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="62" cy="14" r="4.5" fill="var(--gold)"/>
+          </svg>
+        </div>
+        <div class="brand-word">Vocabulando</div>
+      </div>
+      <h3>H. Selo Editorial com Abas Laterais</h3>
+      <p class="desc">O card principal abre duas abas laterais como um livro de capa dura aberto e sela o V bicolor no centro.</p>
+      <button class="btn" onclick="replay('stageH')">Rever H</button>
+    </article>
+  </section>
+
+  <script>
+    let dark = false;
+    function replay(id) {
+      const el = document.getElementById(id);
+      const html = el.innerHTML;
+      el.innerHTML = '';
+      requestAnimationFrame(() => { el.innerHTML = html; });
+    }
+    function toggleMode() {
+      dark = !dark;
+      const r = document.documentElement.style;
+      if (dark) {
+        r.setProperty('--bg', '#13161c'); r.setProperty('--surface', '#1b1f28');
+        r.setProperty('--border', '#2f3545'); r.setProperty('--text', '#efede8');
+        r.setProperty('--muted', '#9ea5b3'); r.setProperty('--sage', '#67b897');
+        r.setProperty('--sage-2', '#82cca9');
+      } else {
+        r.setProperty('--bg', '#f6f3ec'); r.setProperty('--surface', '#ffffff');
+        r.setProperty('--border', '#dfd8ca'); r.setProperty('--text', '#1c1b18');
+        r.setProperty('--muted', '#656056'); r.setProperty('--sage', '#246a52');
+        r.setProperty('--sage-2', '#358a6c');
+      }
+    }
+  </script>
+</body>
+</html>
