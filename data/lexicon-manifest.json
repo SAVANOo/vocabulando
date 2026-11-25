@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-11-24T22:12:57.370Z",
+  "source": "pt.wiktionary.org (kaikki/ptwiktionary)",
+  "totalWords": 10000,
+  "coreWordsCount": 1000,
+  "withRealExample": 6297,
+  "withSynonyms": 9998,
+  "themes": {
+    "geral": {
+      "label": "Uso Geral",
+      "count": 7807
+    },
+    "escola-estudo": {
+      "label": "Escola & Estudo",
+      "count": 187
+    },
+    "cinema-arte": {
+      "label": "Cinema & Arte",
+      "count": 361
+    },
+    "saude-bem-estar": {
+      "label": "Saúde & Bem-estar",
+      "count": 651
+    },
+    "ferias-praia": {
+      "label": "Férias & Praia",
+      "count": 592
+    },
+    "trabalho-negocios": {
+      "label": "Trabalho & Negócios",
+      "count": 124
+    },
+    "gastronomia-casa": {
+      "label": "Gastronomia & Casa",
+      "count": 151
+    },
+    "tecnologia-digital": {
+      "label": "Tecnologia & Digital",
+      "count": 127
+    }
+  },
+  "enrichmentSource": "pt.wiktionary.org + tatoeba.org (por_sentences)"
+}
