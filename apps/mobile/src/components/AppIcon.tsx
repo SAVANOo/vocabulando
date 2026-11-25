@@ -335,39 +335,47 @@ export function MascotLikeSvg({
   mood?: MascotMood;
 }) {
   return (
-    <Svg width={64} height={64} viewBox="0 0 64 64" fill="none">
-      {/* Mascote Livro-Sábio reativo por estado */}
-      <Rect x={14} y={14} width={30} height={36} rx={9} fill={accent} fillOpacity={0.18} stroke={accent} strokeWidth={2.2} />
+    <Svg width={68} height={68} viewBox="0 0 68 68" fill="none">
+      {/* Corpo arredondado estilo coruja/sábio editorial */}
+      <Path
+        d="M16 26C16 17 23 11 32 11C41 11 48 17 48 26V44C48 51 42 56 32 56C22 56 16 51 16 44V26Z"
+        fill={accent}
+        fillOpacity={0.22}
+        stroke={accent}
+        strokeWidth={2.2}
+      />
+      {/* Orelhas/páginas no topo */}
+      <Path d="M18 19L13 11L23 15M46 19L51 11L41 15" stroke={accent} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+      {/* Peito claro */}
+      <Path d="M22 40C25 36 39 36 42 40V47C39 51 25 51 22 47V40Z" fill={accent} fillOpacity={0.14} />
+      {/* Olhos */}
+      <Circle cx={25} cy={27} r={5} fill="#FFFFFF" stroke={accent} strokeWidth={1.6} />
+      <Circle cx={39} cy={27} r={5} fill="#FFFFFF" stroke={accent} strokeWidth={1.6} />
       {mood === "combo" ? (
         <>
-          <Path d="M21 28l3-3 3 3-3 3-3-3ZM31 28l3-3 3 3-3 3-3-3Z" fill={gold} />
-          <Path d="M23 35c3 4 9 4 12 0" stroke={accent} strokeWidth={2.4} strokeLinecap="round" />
-          <Path d="M29 6l1.5 3.5 3.5.5-2.5 2.5.6 3.5L29 14l-3.1 2 .6-3.5L24 10l3.5-.5L29 6Z" fill={gold} />
+          <Circle cx={25} cy={27} r={2.3} fill={gold} />
+          <Circle cx={39} cy={27} r={2.3} fill={gold} />
+          <Path d="M28 33L32 36L36 33" stroke={gold} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+          <Path d="M32 3L33.6 6.8L37.6 7.3L34.7 10L35.4 14L32 12L28.6 14L29.3 10L26.4 7.3L30.4 6.8L32 3Z" fill={gold} />
         </>
       ) : mood === "encourage" ? (
         <>
-          <Circle cx={24} cy={28} r={2.3} fill={accent} />
-          <Path d="M31 28c1.5-1.5 4-1.5 5.5 0" stroke={accent} strokeWidth={2.1} strokeLinecap="round" />
-          <Path d="M25 36c2 2 6 2 8 0" stroke={accent} strokeWidth={2} strokeLinecap="round" />
-        </>
-      ) : mood === "curious" ? (
-        <>
-          <Circle cx={24} cy={27} r={2.5} fill={accent} />
-          <Circle cx={34} cy={27} r={2.5} fill={accent} />
-          <Circle cx={29} cy={37} r={2.2} stroke={accent} strokeWidth={2} />
+          <Circle cx={25} cy={27} r={2.1} fill={accent} />
+          <Path d="M36 27C37.5 25.5 40.5 25.5 42 27" stroke={accent} strokeWidth={2} strokeLinecap="round" />
+          <Path d="M29 33L32 35L35 33" stroke={gold} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
         </>
       ) : (
         <>
-          <Circle cx={24} cy={28} r={2.5} fill={accent} />
-          <Circle cx={34} cy={28} r={2.5} fill={accent} />
-          <Path d="M24 36c2.5 3 7.5 3 10 0" stroke={accent} strokeWidth={2.2} strokeLinecap="round" />
+          <Circle cx={25.5} cy={27} r={2.2} fill={accent} />
+          <Circle cx={39.5} cy={27} r={2.2} fill={accent} />
+          <Path d="M29 33L32 36L35 33" stroke={gold} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
         </>
       )}
-      {/* Mão dando like */}
+      {/* Asa dando joinha */}
       <Path
-        d="M46 34h5a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-5V34Zm0 0l2-7a2 2 0 0 1 3.8.6L51 34"
+        d="M50 36H55C56.7 36 58 37.3 58 39V44C58 45.7 56.7 47 55 47H50V36ZM50 36L52.2 29.2C52.6 28 54.2 27.8 55 28.8C55.6 29.6 55.5 30.8 55 32L54 36"
         fill={gold}
-        fillOpacity={0.28}
+        fillOpacity={0.32}
         stroke={gold}
         strokeWidth={2}
         strokeLinecap="round"

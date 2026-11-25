@@ -14,33 +14,31 @@ interface Props {
 }
 
 const BURST_VECTORS = [
-  { x: -64, y: -56 },
-  { x: 0, y: -76 },
-  { x: 64, y: -56 },
-  { x: 78, y: 0 },
-  { x: 58, y: 58 },
-  { x: 0, y: 74 },
-  { x: -58, y: 58 },
-  { x: -78, y: 0 },
+  { x: -72, y: -42 },
+  { x: -24, y: -58 },
+  { x: 24, y: -58 },
+  { x: 72, y: -42 },
+  { x: 90, y: 0 },
+  { x: -90, y: 0 },
 ];
 
 export function CelebrationPopup({ visible, xp, title, subtitle, mood, palette, onDismiss }: Props) {
   const effectiveMood: MascotMood = mood ?? (xp >= 20 ? "combo" : "celebrate");
-  const [scale] = useState(() => new Animated.Value(0.6));
+  const [slideY] = useState(() => new Animated.Value(80));
   const [opacity] = useState(() => new Animated.Value(0));
   const [burst] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     if (!visible) return;
-    scale.setValue(0.55);
+    slideY.setValue(64);
     opacity.setValue(0);
     burst.setValue(0);
     Animated.parallel([
-      Animated.spring(scale, { toValue: 1, friction: 5, tension: 95, useNativeDriver: true }),
+      Animated.spring(slideY, { toValue: 0, friction: 6, tension: 85, useNativeDriver: true }),
       Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }),
       Animated.timing(burst, {
         toValue: 1,
-        duration: 750,
+        duration: 700,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
@@ -48,93 +46,96 @@ export function CelebrationPopup({ visible, xp, title, subtitle, mood, palette, 
 
     const timer = setTimeout(() => {
       onDismiss();
-    }, 1700);
+    }, subtitle ? 2400 : 1750);
     return () => clearTimeout(timer);
-  }, [visible, scale, opacity, burst, onDismiss]);
+  }, [visible, subtitle, slideY, opacity, burst, onDismiss]);
 
   if (!visible) return null;
 
   const burstOpacity = burst.interpolate({ inputRange: [0, 0.25, 1], outputRange: [0, 1, 0] });
-  const burstScale = burst.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1.25] });
+  const burstScale = burst.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1.2] });
 
   return (
-    <Pressable style={styles.overlay} onPress={onDismiss}>
-      <View style={styles.stage}>
-        {BURST_VECTORS.map((vec, i) => (
-          <Animated.View
-            key={i}
-            pointerEvents="none"
-            style={[
-              styles.particle,
-              {
-                opacity: burstOpacity,
-                transform: [
-                  { translateX: burst.interpolate({ inputRange: [0, 1], outputRange: [0, vec.x] }) },
-                  { translateY: burst.interpolate({ inputRange: [0, 1], outputRange: [0, vec.y] }) },
-                  { scale: burstScale },
-                ],
-              },
-            ]}
-          >
-            <AppIcon
-              name="star"
-              size={18}
-              color={i % 2 === 0 ? palette.gold : palette.accent}
-              filled
-            />
-          </Animated.View>
-        ))}
+    <View pointerEvents="box-none" style={styles.container}>
+      {BURST_VECTORS.map((vec, i) => (
+        <Animated.View
+          key={i}
+          pointerEvents="none"
+          style={[
+            styles.particle,
+            {
+              opacity: burstOpacity,
+              transform: [
+                { translateX: burst.interpolate({ inputRange: [0, 1], outputRange: [0, vec.x] }) },
+                { translateY: burst.interpolate({ inputRange: [0, 1], outputRange: [0, vec.y] }) },
+                { scale: burstScale },
+              ],
+            },
+          ]}
+        >
+          <AppIcon
+            name="star"
+            size={15}
+            color={i % 2 === 0 ? palette.gold : palette.accent}
+            filled
+          />
+        </Animated.View>
+      ))}
 
+      <Pressable style={{ width: "100%" }} onPress={onDismiss}>
         <Animated.View
           style={[
-            styles.card,
+            styles.banner,
             {
               backgroundColor: palette.surface,
               borderColor: palette.success,
               opacity,
-              transform: [{ scale }],
+              transform: [{ translateY: slideY }],
             },
           ]}
         >
           <MascotLikeSvg accent={palette.accent} gold={palette.gold} mood={effectiveMood} />
-          <Text style={[styles.title, { color: palette.text }]}>{title}</Text>
-          {subtitle && (
-            <Text style={[styles.subtitle, { color: palette.muted }]}>{subtitle}</Text>
-          )}
-          <Text style={[styles.xp, { color: palette.success }]}>+{xp} XP</Text>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={[styles.title, { color: palette.text }]}>{title}</Text>
+            {subtitle && (
+              <Text style={[styles.subtitle, { color: palette.muted }]}>{subtitle}</Text>
+            )}
+          </View>
+          <View style={[styles.xpPill, { backgroundColor: palette.accentSoft }]}>
+            <Text style={[styles.xp, { color: palette.success }]}>+{xp} XP</Text>
+          </View>
         </Animated.View>
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
+  container: {
     position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
+    left: 14,
+    right: 14,
+    bottom: 72,
     alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.28)",
     zIndex: 40,
   },
-  stage: { alignItems: "center", justifyContent: "center" },
-  particle: { position: "absolute", zIndex: 42 },
-  card: {
+  particle: { position: "absolute", top: 10, zIndex: 42 },
+  banner: {
+    width: "100%",
     borderWidth: 2,
-    borderRadius: 24,
-    paddingHorizontal: 28,
-    paddingVertical: 20,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.24,
-    shadowRadius: 18,
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
     elevation: 10,
   },
-  title: { fontSize: 18, fontWeight: "700", textAlign: "center" },
-  subtitle: { fontSize: 12, textAlign: "center", maxWidth: 230 },
-  xp: { fontSize: 15, fontWeight: "800" },
+  title: { fontSize: 15, fontWeight: "800" },
+  subtitle: { fontSize: 12 },
+  xpPill: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
+  xp: { fontSize: 13, fontWeight: "800" },
 });

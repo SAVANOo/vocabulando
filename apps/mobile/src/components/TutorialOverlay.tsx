@@ -54,7 +54,15 @@ export function TutorialOverlay({ visible, palette, soundEnabled, onClose }: Pro
   }
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={() => {
+        setStep(0);
+        onClose();
+      }}
+    >
       <View style={styles.backdrop}>
         <View
           style={[
