@@ -15,8 +15,6 @@ import {
 } from "react-native";
 import {
   applyHabitAction,
-  buildMixedPracticeQueue,
-  buildQuizBlank,
   createInitialSrsState,
   getLexiconRank,
   isDailyGoalMet,
@@ -28,24 +26,17 @@ import {
 import { AppIcon, BrandLogoIcon } from "./components/AppIcon";
 import { CelebrationPopup } from "./components/CelebrationPopup";
 import { CommuteAudioModal } from "./components/CommuteAudioModal";
-import { ConfusionRadarChallenge } from "./components/ConfusionRadarChallenge";
 import { DictionaryLookupModal } from "./components/DictionaryLookupModal";
-import { LearningPath, type PathExerciseKind } from "./components/LearningPath";
+import { LearningPath, type PathNodeAction } from "./components/LearningPath";
+import { LessonSessionRunner } from "./components/LessonSessionRunner";
 import { ExLibrisShelfModal } from "./components/ExLibrisShelfModal";
-import { FreeWritingChallenge } from "./components/FreeWritingChallenge";
-import { ListeningChallenge } from "./components/ListeningChallenge";
 import { OnboardingFlow, type UserPreferences } from "./components/OnboardingFlow";
-import { ParonymChallenge } from "./components/ParonymChallenge";
 import { ReadingImporterModal } from "./components/ReadingImporterModal";
-import { ReplaceGenericChallenge } from "./components/ReplaceGenericChallenge";
 import { SafeErrorBoundary } from "./components/SafeErrorBoundary";
 import { SplashBookIntro } from "./components/SplashBookIntro";
 import { StreakModal } from "./components/StreakModal";
 import { StudyFlipCard } from "./components/StudyFlipCard";
-import { SynonymGame } from "./components/SynonymGame";
-import { TimedSprintChallenge } from "./components/TimedSprintChallenge";
 import { TutorialOverlay } from "./components/TutorialOverlay";
-import { WritingChallenge } from "./components/WritingChallenge";
 import { MOBILE_LEXICON } from "./data/mobileLexicon";
 import {
   countPendingEvents,
@@ -55,6 +46,8 @@ import {
   flushOfflineEvents,
   getLocalAnalyticsSummary,
   getLocalCatalogCounts,
+  getLocalTrackCounts,
+  getLocalWordsByIds,
   loadLocalState,
   pullRemoteProgress,
   queryLocalLexicon,
@@ -68,17 +61,6 @@ import { playUiSound } from "./utils/soundEffects";
 import { syncNativeWidgetCache } from "./utils/widgetSync";
 
 type MainTab = "home" | "practice" | "progress";
-type PracticeMode =
-  | "path"
-  | "listening"
-  | "synonyms"
-  | "upgrade"
-  | "writing"
-  | "freewrite"
-  | "radar"
-  | "paronyms"
-  | "sprint"
-  | "quiz";
 
 const ALL_TRACKS: Array<{ id: TrackCategory; label: string }> = [
   { id: "essencial-culto", label: "Essencial Culto" },
@@ -179,16 +161,13 @@ function MobileAppContent() {
   const [tooltipText, setTooltipText] = useState<string | null>(null);
   const [tab, setTab] = useState<MainTab>("home");
   const [tabBarWidth, setTabBarWidth] = useState(360);
-  const [practiceMode, setPracticeMode] = useState<PracticeMode>("path");
-  const [practiceSeed, setPracticeSeed] = useState(0);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [activeLessonNode, setActiveLessonNode] = useState<PathNodeAction | null>(null);
   const [useAllTracks, setUseAllTracks] = useState(false);
   const [filterByDifficulty, setFilterByDifficulty] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState("all");
   const [catalogVersion, setCatalogVersion] = useState(0);
   const [cardIndex, setCardIndex] = useState(0);
-  const [quizIndex, setQuizIndex] = useState(0);
-  const [showQuizHint, setShowQuizHint] = useState(false);
-  const [quizFeedback, setQuizFeedback] = useState<{ text: string; hit: boolean } | null>(null);
   const [celebration, setCelebration] = useState<{
     visible: boolean;
     xp: number;
@@ -258,18 +237,6 @@ function MobileAppContent() {
     trackAnalyticsEvent("tab_switch", 0, { tab: nextTab });
   }
 
-  function switchPracticeMode(nextMode: PracticeMode) {
-    Vibration.vibrate(6);
-    practiceFade.setValue(0);
-    setPracticeMode(nextMode);
-    Animated.timing(practiceFade, {
-      toValue: 1,
-      duration: 240,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-  }
-
   const activeFeed = useMemo(() => {
     const dbRows =
       catalogCounts.wordsCount > 0 || catalogVersion > 0
@@ -277,7 +244,7 @@ function MobileAppContent() {
             tracks: useAllTracks || selectedTheme !== "all" ? undefined : state.prefs.tracks,
             theme: selectedTheme,
             difficulty: filterByDifficulty ? state.prefs.difficulty : undefined,
-            limit: 120,
+            limit: 10,
           })
         : [];
     if (dbRows.length > 0) return dbRows;
@@ -291,7 +258,7 @@ function MobileAppContent() {
       const byDiff = list.filter((w) => w.difficulty === state.prefs.difficulty);
       if (byDiff.length > 0) list = byDiff;
     }
-    return list;
+    return list.slice(0, 10);
   }, [catalogCounts.wordsCount, catalogVersion, state.prefs.tracks, state.prefs.difficulty, useAllTracks, filterByDifficulty, selectedTheme]);
 
   const currentWord = activeFeed[cardIndex % activeFeed.length] ?? MOBILE_LEXICON[0]!;
@@ -338,7 +305,10 @@ function MobileAppContent() {
     const nextHabit = applyHabitAction(state.habit, "WORD_VIEWED", currentIso, dailyGoal);
     const justCompletedGoal = !goalMet && isDailyGoalMet(nextHabit, dailyGoal);
     const isNewWord = !state.studiedIds.includes(wordId);
-    const wordLabel = MOBILE_LEXICON.find((w) => w.id === wordId)?.word ?? wordId;
+    const wordLabel =
+      activeFeed.find((w) => w.id === wordId)?.word ??
+      MOBILE_LEXICON.find((w) => w.id === wordId)?.word ??
+      currentWord.word;
     playUiSound(justCompletedGoal || isNewWord ? "success" : "save", state.soundEnabled);
 
     if (justCompletedGoal) {
@@ -384,33 +354,38 @@ function MobileAppContent() {
     trackAnalyticsEvent("word_saved_toggle", 0, { wordId });
   }
 
-  function handlePracticeScore(wordId: string, correct: boolean) {
+  function handlePracticeScore(wordId: string, correct: boolean, skipXp = false) {
     const currentIso = new Date().toISOString();
     setNowIso(currentIso);
-    const xpGain = correct ? 15 : 2;
-    if (correct) {
+    const xpGain = skipXp ? 0 : correct ? 15 : 2;
+    if (correct && !activeLessonNode) {
       const msg = CELEBRATION_MESSAGES[state.quizCorrect % CELEBRATION_MESSAGES.length]!;
       setCelebration({ visible: true, xp: 15, title: msg });
     }
     setState((prev) => {
       const existing = prev.srsCards[wordId] ?? createInitialSrsState(wordId, currentIso);
       const nextSrs = scheduleSrsReview(existing, correct ? 3 : 1, currentIso);
+      const nextHabit = applyHabitAction(
+        prev.habit,
+        correct ? "QUIZ_CORRECT" : "QUIZ_WRONG",
+        currentIso,
+        dailyGoal,
+      );
       return {
         ...prev,
-        habit: applyHabitAction(
-          prev.habit,
-          correct ? "QUIZ_CORRECT" : "QUIZ_WRONG",
-          currentIso,
-          dailyGoal,
-        ),
+        habit: skipXp ? { ...nextHabit, totalXp: prev.habit.totalXp } : nextHabit,
         quizTotal: prev.quizTotal + 1,
         quizCorrect: prev.quizCorrect + (correct ? 1 : 0),
-        weeklyXp: addWeeklyXp(prev.weeklyXp, xpGain, currentIso),
+        weeklyXp: xpGain > 0 ? addWeeklyXp(prev.weeklyXp, xpGain, currentIso) : prev.weeklyXp,
         srsCards: { ...prev.srsCards, [wordId]: nextSrs },
       };
     });
     recordOffline("QUIZ_ANSWERED", wordId, { correct });
-    trackAnalyticsEvent("quiz_answered", 0, { wordId, correct, mode: practiceMode });
+    trackAnalyticsEvent("quiz_answered", 0, {
+      wordId,
+      correct,
+      mode: activeLessonNode?.kind ?? "path",
+    });
   }
 
   function toggleProfileTrack(id: TrackCategory) {
@@ -491,41 +466,23 @@ function MobileAppContent() {
     );
   }
 
-  const quizQueue = buildMixedPracticeQueue(
-    activeFeed,
-    state.studiedIds,
-    dueReviewIds,
-    practiceSeed,
-    6,
-    state.srsCards,
-  );
-  const quizItem = quizQueue[quizIndex % quizQueue.length]!;
-  const quizTarget = quizItem.item;
-  const quizBlank = buildQuizBlank(quizTarget.example, quizTarget.word, quizTarget.definition);
-  const quizOptions = [
-    quizTarget.word,
-    MOBILE_LEXICON[(quizIndex + 1) % MOBILE_LEXICON.length]!.word,
-    MOBILE_LEXICON[(quizIndex + 2) % MOBILE_LEXICON.length]!.word,
-  ].sort();
-
   const accuracyPct =
     state.quizTotal > 0 ? Math.round((state.quizCorrect / state.quizTotal) * 100) : 100;
   const maxWeekly = Math.max(10, ...state.weeklyXp);
-  const userInitial = (state.prefs.userName.trim()[0] ?? "S").toUpperCase();
+  const userInitial = (state.prefs.userName.trim()[0] ?? "V").toUpperCase();
+  const difficultyLabel =
+    state.prefs.difficulty === "intermediario"
+      ? "Intermediário"
+      : state.prefs.difficulty === "avancado"
+        ? "Avançado"
+        : "Erudito";
+  const localTrackCounts =
+    tab === "progress" && catalogCounts.wordsCount > 0
+      ? getLocalTrackCounts(state.studiedIds)
+      : {};
+  const savedWordsList =
+    tab === "progress" && state.savedIds.length > 0 ? getLocalWordsByIds(state.savedIds) : [];
   const tabSlotWidth = Math.max(80, tabBarWidth / 3);
-
-  const exerciseTitles: Record<PracticeMode, string> = {
-    path: "Trilha",
-    listening: "Escuta Ativa",
-    synonyms: "Jogo de Sinônimos",
-    upgrade: "Substitua o Genérico",
-    writing: "Escrita em Contexto",
-    freewrite: "Use na Sua Frase",
-    radar: "Radar de Confusão",
-    paronyms: "Desafio de Parônimos",
-    sprint: "Desafio 60s",
-    quiz: "Revisão Inteligente",
-  };
 
   return (
     <SafeAreaView style={[styles.root, { backgroundColor: palette.bg }]}>
@@ -770,7 +727,7 @@ function MobileAppContent() {
           <View>
             <Text style={[styles.brand, { color: palette.accent }]}>Vocabulando</Text>
             <Text style={[styles.subBrand, { color: palette.muted }]}>
-              Olá, {state.prefs.userName} • {rank}
+              Olá, {state.prefs.userName.trim() || "Estudante"} • {rank}
             </Text>
           </View>
         </View>
@@ -859,11 +816,15 @@ function MobileAppContent() {
 
               {/* Clear Search, Commute Audio & Feed Filters */}
               <View style={{ gap: 8, marginTop: 4 }}>
-                <View style={{ flexDirection: "row", gap: 8 }}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 8 }}
+                >
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Buscar palavra no dicionário"
-                    style={[styles.dictBarBtn, { flex: 1, backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}
+                    style={[styles.dictBarBtn, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}
                     onPress={() => setShowLookup(true)}
                   >
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -876,7 +837,7 @@ function MobileAppContent() {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Abrir Modo Trajeto por áudio"
-                    style={[styles.dictBarBtn, { flex: 1, backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}
+                    style={[styles.dictBarBtn, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}
                     onPress={() => setCommuteOpen(true)}
                   >
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -889,7 +850,7 @@ function MobileAppContent() {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Importar trecho de leitura"
-                    style={[styles.dictBarBtn, { flex: 1, backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}
+                    style={[styles.dictBarBtn, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}
                     onPress={() => setImporterOpen(true)}
                   >
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -899,95 +860,115 @@ function MobileAppContent() {
                       </Text>
                     </View>
                   </Pressable>
-                </View>
-
-                <View style={styles.filterRow}>
-                  <Text style={{ color: palette.muted, fontSize: 11, fontWeight: "700" }}>
-                    FILTRAR CARDS:
-                  </Text>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Alternar filtro de trilhas"
+                    accessibilityLabel="Mostrar ou ocultar filtros"
                     style={[
-                      styles.pillBtn,
+                      styles.dictBarBtn,
                       {
-                        backgroundColor: useAllTracks ? palette.surfaceAlt : palette.accentSoft,
-                        borderColor: useAllTracks ? palette.border : palette.accent,
+                        backgroundColor: filtersOpen ? palette.accentSoft : palette.surfaceAlt,
+                        borderColor: filtersOpen ? palette.accent : palette.border,
                       },
                     ]}
-                    onPress={() => {
-                      setUseAllTracks((v) => !v);
-                      setCardIndex(0);
-                    }}
+                    onPress={() => setFiltersOpen((v) => !v)}
                   >
-                    <Text
-                      style={{
-                        color: useAllTracks ? palette.text : palette.accent,
-                        fontSize: 11,
-                        fontWeight: "700",
-                      }}
-                    >
-                      {useAllTracks ? "Trilhas: Todas (20)" : `Minhas trilhas (${activeFeed.length})`}
+                    <Text style={{ color: filtersOpen ? palette.accent : palette.text, fontSize: 12, fontWeight: "700" }}>
+                      {filtersOpen ? "Filtros ▲" : "Filtros ▾"}
                     </Text>
                   </Pressable>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Filtrar pelo meu nível"
-                    style={[
-                      styles.pillBtn,
-                      {
-                        backgroundColor: filterByDifficulty ? palette.accentSoft : palette.surfaceAlt,
-                        borderColor: filterByDifficulty ? palette.accent : palette.border,
-                      },
-                    ]}
-                    onPress={() => {
-                      setFilterByDifficulty((v) => !v);
-                      setCardIndex(0);
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: filterByDifficulty ? palette.accent : palette.text,
-                        fontSize: 11,
-                        fontWeight: "700",
-                      }}
-                    >
-                      {filterByDifficulty ? `Nível: ${state.prefs.difficulty}` : "Nível: Todos"}
-                    </Text>
-                  </Pressable>
-                </View>
+                </ScrollView>
 
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
-                  {ALL_THEMES.map((tm) => {
-                    const active = selectedTheme === tm.id;
-                    return (
+                {filtersOpen && (
+                  <View style={{ gap: 8, marginTop: 4 }}>
+                    <View style={styles.filterRow}>
+                      <Text style={{ color: palette.muted, fontSize: 11, fontWeight: "700" }}>
+                        FILTRAR CARDS:
+                      </Text>
                       <Pressable
-                        key={tm.id}
                         accessibilityRole="button"
+                        accessibilityLabel="Alternar filtro de trilhas"
                         style={[
                           styles.pillBtn,
                           {
-                            backgroundColor: active ? palette.accentSoft : palette.surfaceAlt,
-                            borderColor: active ? palette.accent : palette.border,
+                            backgroundColor: useAllTracks ? palette.surfaceAlt : palette.accentSoft,
+                            borderColor: useAllTracks ? palette.border : palette.accent,
                           },
                         ]}
                         onPress={() => {
-                          setSelectedTheme(tm.id);
+                          setUseAllTracks((v) => !v);
                           setCardIndex(0);
-                          if (tm.id !== "all") {
-                            void downloadThemePack(getDefaultApiUrl(), tm.id).then((added) => {
-                              if (added > 0) setCatalogVersion((v) => v + 1);
-                            });
-                          }
                         }}
                       >
-                        <Text style={{ color: active ? palette.accent : palette.muted, fontSize: 11, fontWeight: "700" }}>
-                          {tm.label}
+                        <Text
+                          style={{
+                            color: useAllTracks ? palette.text : palette.accent,
+                            fontSize: 11,
+                            fontWeight: "700",
+                          }}
+                        >
+                          {useAllTracks ? "Trilhas: Todas" : `Minhas trilhas (${activeFeed.length})`}
                         </Text>
                       </Pressable>
-                    );
-                  })}
-                </ScrollView>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="Filtrar pelo meu nível"
+                        style={[
+                          styles.pillBtn,
+                          {
+                            backgroundColor: filterByDifficulty ? palette.accentSoft : palette.surfaceAlt,
+                            borderColor: filterByDifficulty ? palette.accent : palette.border,
+                          },
+                        ]}
+                        onPress={() => {
+                          setFilterByDifficulty((v) => !v);
+                          setCardIndex(0);
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: filterByDifficulty ? palette.accent : palette.text,
+                            fontSize: 11,
+                            fontWeight: "700",
+                          }}
+                        >
+                          {filterByDifficulty ? `Nível: ${difficultyLabel}` : "Nível: Todos"}
+                        </Text>
+                      </Pressable>
+                    </View>
+
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+                      {ALL_THEMES.map((tm) => {
+                        const active = selectedTheme === tm.id;
+                        return (
+                          <Pressable
+                            key={tm.id}
+                            accessibilityRole="button"
+                            style={[
+                              styles.pillBtn,
+                              {
+                                backgroundColor: active ? palette.accentSoft : palette.surfaceAlt,
+                                borderColor: active ? palette.accent : palette.border,
+                              },
+                            ]}
+                            onPress={() => {
+                              setSelectedTheme(tm.id);
+                              setCardIndex(0);
+                              if (tm.id !== "all") {
+                                void downloadThemePack(getDefaultApiUrl(), tm.id).then((added) => {
+                                  if (added > 0) setCatalogVersion((v) => v + 1);
+                                });
+                              }
+                            }}
+                          >
+                            <Text style={{ color: active ? palette.accent : palette.muted, fontSize: 11, fontWeight: "700" }}>
+                              {tm.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+                )}
               </View>
             </View>
 
@@ -1074,198 +1055,63 @@ function MobileAppContent() {
 
         {tab === "practice" && (
           <View style={{ flex: 1 }}>
-            {practiceMode !== "path" && (
-              <View style={[styles.exerciseHeader, { backgroundColor: palette.surface, borderBottomColor: palette.border }]}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Voltar para a trilha"
-                  style={[styles.pillBtn, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}
-                  onPress={() => switchPracticeMode("path")}
-                >
-                  <Text style={{ color: palette.text, fontSize: 12, fontWeight: "700" }}>
-                    ← Trilha
-                  </Text>
-                </Pressable>
-                <Text style={{ color: palette.accent, fontSize: 13, fontWeight: "700" }}>
-                  {exerciseTitles[practiceMode]}
-                </Text>
-                <View style={{ width: 64 }} />
-              </View>
-            )}
-
             <Animated.View style={{ flex: 1, opacity: practiceFade }}>
-              {practiceMode === "path" ? (
+              {!activeLessonNode ? (
                 <LearningPath
                   palette={palette}
-                  studiedCount={state.studiedIds.length}
-                  quizCorrectCount={state.quizCorrect}
+                  completedNodeIds={state.completedNodeIds}
                   dueReviewsCount={dueReviewsCount}
-                  totalXp={state.habit.totalXp}
-                  onSelectNode={(kind: PathExerciseKind, seedOffset: number) => {
-                    setPracticeSeed(seedOffset);
-                    if (kind === "track") {
-                      setCardIndex(seedOffset % activeFeed.length);
+                  onSelectNode={(node) => {
+                    if (node.kind === "track") {
+                      setCardIndex(node.seedOffset % activeFeed.length);
+                      setState((prev) => ({
+                        ...prev,
+                        completedNodeIds: prev.completedNodeIds.includes(node.id)
+                          ? prev.completedNodeIds
+                          : [...prev.completedNodeIds, node.id],
+                      }));
                       switchTab("home");
                     } else {
-                      if (kind === "quiz") {
-                        setQuizIndex(seedOffset);
-                        setQuizFeedback(null);
-                        setShowQuizHint(false);
-                      }
-                      switchPracticeMode(kind);
+                      practiceFade.setValue(0);
+                      setActiveLessonNode(node);
+                      Animated.timing(practiceFade, {
+                        toValue: 1,
+                        duration: 240,
+                        easing: Easing.out(Easing.cubic),
+                        useNativeDriver: true,
+                      }).start();
                     }
                   }}
                 />
-              ) : practiceMode === "listening" ? (
-                <ListeningChallenge
-                  key={`listen-${practiceSeed}`}
-                  palette={palette}
-                  soundEnabled={state.soundEnabled}
-                  words={activeFeed}
-                  studiedIds={state.studiedIds}
-                  dueIds={dueReviewIds}
-                  initialSeed={practiceSeed}
-                  onScore={handlePracticeScore}
-                />
-              ) : practiceMode === "writing" ? (
-                <WritingChallenge
-                  key={`write-${practiceSeed}`}
-                  palette={palette}
-                  soundEnabled={state.soundEnabled}
-                  words={activeFeed}
-                  studiedIds={state.studiedIds}
-                  dueIds={dueReviewIds}
-                  initialSeed={practiceSeed}
-                  onScore={handlePracticeScore}
-                />
-              ) : practiceMode === "synonyms" ? (
-                <SynonymGame
-                  key={`syn-${practiceSeed}`}
-                  palette={palette}
-                  soundEnabled={state.soundEnabled}
-                  initialSeed={practiceSeed}
-                  onScore={(hit) => handlePracticeScore("eloquencia", hit)}
-                />
-              ) : practiceMode === "upgrade" ? (
-                <ReplaceGenericChallenge
-                  key={`upg-${practiceSeed}`}
-                  palette={palette}
-                  soundEnabled={state.soundEnabled}
-                  initialSeed={practiceSeed}
-                  onScore={handlePracticeScore}
-                />
-              ) : practiceMode === "freewrite" ? (
-                <FreeWritingChallenge
-                  key={`fw-${practiceSeed}`}
-                  palette={palette}
-                  soundEnabled={state.soundEnabled}
-                  words={activeFeed}
-                  initialSeed={practiceSeed}
-                  onScore={handlePracticeScore}
-                />
-              ) : practiceMode === "radar" ? (
-                <ConfusionRadarChallenge
-                  key={`rad-${practiceSeed}`}
-                  palette={palette}
-                  soundEnabled={state.soundEnabled}
-                  initialSeed={practiceSeed}
-                  onScore={handlePracticeScore}
-                />
-              ) : practiceMode === "sprint" ? (
-                <TimedSprintChallenge
-                  key={`spr-${practiceSeed}`}
-                  palette={palette}
-                  soundEnabled={state.soundEnabled}
-                  words={activeFeed}
-                  onScore={handlePracticeScore}
-                />
-              ) : practiceMode === "paronyms" ? (
-                <ParonymChallenge
-                  key={`par-${practiceSeed}`}
-                  palette={palette}
-                  soundEnabled={state.soundEnabled}
-                  initialSeed={practiceSeed}
-                  onScore={handlePracticeScore}
-                />
               ) : (
-                <ScrollView contentContainerStyle={styles.quizCenteredScroll}>
-                  <View style={[styles.missionCard, { backgroundColor: palette.surface, borderColor: palette.border, gap: 12 }]}>
-                    <Text style={[styles.missionLabel, { color: palette.accent }]}>
-                      COMPLETE A FRASE{dueReviewsCount > 0 ? ` • ${dueReviewsCount} PARA REVISAR` : ""}
-                    </Text>
-                    <Text style={{ color: palette.text, fontSize: 17, lineHeight: 24 }}>
-                      {quizBlank.prompt}
-                    </Text>
-
-                    <Pressable
-                      accessibilityRole="button"
-                      onPress={() => setShowQuizHint((v) => !v)}
-                      style={[styles.hintToggle, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}
-                    >
-                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                        <AppIcon name="lightbulb" size={14} color={palette.accent} />
-                        <Text style={{ color: palette.accent, fontSize: 12, fontWeight: "700" }}>
-                          {showQuizHint ? "Ocultar dica" : "Ver dica"}
-                        </Text>
-                      </View>
-                    </Pressable>
-
-                    {showQuizHint && (
-                      <Text style={{ color: palette.muted, fontSize: 13 }}>
-                        Dica: {quizTarget.definition}
-                      </Text>
-                    )}
-
-                    {quizOptions.map((opt) => (
-                      <Pressable
-                        key={opt}
-                        accessibilityRole="button"
-                        style={[styles.quizOpt, { backgroundColor: palette.surfaceAlt, borderColor: palette.border }]}
-                        onPress={() => {
-                          const hit = opt === quizTarget.word;
-                          Vibration.vibrate(hit ? 15 : 35);
-                          playUiSound(hit ? "success" : "softError", state.soundEnabled);
-                          setQuizFeedback({
-                            hit,
-                            text: hit
-                              ? "Correto! +15 XP"
-                              : `A resposta correta é "${quizTarget.word}". Vamos reforçar na próxima revisão.`,
-                          });
-                          handlePracticeScore(quizTarget.id, hit);
-                        }}
-                      >
-                        <Text style={{ color: palette.text, fontSize: 15, fontWeight: "600" }}>
-                          {opt}
-                        </Text>
-                      </Pressable>
-                    ))}
-                    {quizFeedback && (
-                      <View style={{ gap: 8 }}>
-                        <Text
-                          style={{
-                            color: quizFeedback.hit ? palette.success : palette.danger,
-                            fontWeight: "700",
-                            fontSize: 14,
-                          }}
-                        >
-                          {quizFeedback.text}
-                        </Text>
-                        <Pressable
-                          style={[styles.primaryAction, { backgroundColor: palette.accent }]}
-                          onPress={() => {
-                            setQuizFeedback(null);
-                            setShowQuizHint(false);
-                            setQuizIndex((i) => i + 1);
-                          }}
-                        >
-                          <Text style={{ color: palette.accentInk, fontWeight: "700" }}>
-                            Próxima pergunta →
-                          </Text>
-                        </Pressable>
-                      </View>
-                    )}
-                  </View>
-                </ScrollView>
+                <LessonSessionRunner
+                  key={activeLessonNode.id}
+                  nodeId={activeLessonNode.id}
+                  kind={activeLessonNode.kind}
+                  seedOffset={activeLessonNode.seedOffset}
+                  words={activeFeed}
+                  palette={palette}
+                  soundEnabled={state.soundEnabled}
+                  onRecordAnswer={(wordId, hit) => handlePracticeScore(wordId, hit, true)}
+                  onCompleteLesson={(nodeId, xpEarned) => {
+                    const currentIso = new Date().toISOString();
+                    setNowIso(currentIso);
+                    setState((prev) => ({
+                      ...prev,
+                      completedNodeIds: prev.completedNodeIds.includes(nodeId)
+                        ? prev.completedNodeIds
+                        : [...prev.completedNodeIds, nodeId],
+                      habit: {
+                        ...prev.habit,
+                        totalXp: prev.habit.totalXp + xpEarned,
+                      },
+                      weeklyXp: addWeeklyXp(prev.weeklyXp, xpEarned, currentIso),
+                    }));
+                    trackAnalyticsEvent("lesson_completed", 0, { nodeId, xpEarned });
+                    setActiveLessonNode(null);
+                  }}
+                  onExit={() => setActiveLessonNode(null)}
+                />
               )}
             </Animated.View>
           </View>
@@ -1295,7 +1141,7 @@ function MobileAppContent() {
                 </View>
                 <View style={[styles.statBox, { backgroundColor: palette.surfaceAlt }]}>
                   <Text style={{ color: palette.accent, fontSize: 18, fontWeight: "700" }}>
-                    {state.studiedIds.length}/{MOBILE_LEXICON.length}
+                    {state.studiedIds.length}/{catalogCounts.wordsCount > 0 ? catalogCounts.wordsCount : MOBILE_LEXICON.length}
                   </Text>
                   <Text style={{ color: palette.muted, fontSize: 11 }}>Estudadas</Text>
                 </View>
@@ -1335,12 +1181,6 @@ function MobileAppContent() {
                 Práticas registradas: {analyticsSummary.totalEvents} • Tempo médio por card:{" "}
                 {Math.round(analyticsSummary.avgDwellMs / 1000)}s
               </Text>
-              {catalogCounts.wordsCount > 0 && (
-                <Text style={{ color: palette.accent, fontSize: 12, fontWeight: "600" }}>
-                  Acervo ativo: {catalogCounts.wordsCount.toLocaleString("pt-BR")} palavras •{" "}
-                  {catalogCounts.activitiesCount.toLocaleString("pt-BR")} atividades
-                </Text>
-              )}
               <Pressable
                 accessibilityRole="button"
                 style={[styles.dictBarBtn, { backgroundColor: palette.accentSoft, borderColor: palette.accent, marginTop: 4 }]}
@@ -1376,10 +1216,13 @@ function MobileAppContent() {
             <View style={[styles.missionCard, { backgroundColor: palette.surface, borderColor: palette.border, gap: 10 }]}>
               <Text style={[styles.missionLabel, { color: palette.accent }]}>DOMÍNIO POR TRILHA</Text>
               {ALL_TRACKS.map((tr) => {
-                const total = MOBILE_LEXICON.filter((w) => w.category === tr.id).length;
-                const done = MOBILE_LEXICON.filter(
-                  (w) => w.category === tr.id && state.studiedIds.includes(w.id),
-                ).length;
+                const dbTrack = localTrackCounts[tr.id];
+                const total = dbTrack?.total ?? MOBILE_LEXICON.filter((w) => w.category === tr.id).length;
+                const done =
+                  dbTrack?.done ??
+                  MOBILE_LEXICON.filter(
+                    (w) => w.category === tr.id && state.studiedIds.includes(w.id),
+                  ).length;
                 const pct = total > 0 ? Math.round((done / total) * 100) : 0;
                 return (
                   <View key={tr.id} style={{ gap: 4 }}>
@@ -1399,30 +1242,26 @@ function MobileAppContent() {
               <Text style={[styles.missionLabel, { color: palette.accent }]}>
                 PALAVRAS FAVORITAS ({state.savedIds.length})
               </Text>
-              {state.savedIds.length === 0 ? (
+              {savedWordsList.length === 0 ? (
                 <Text style={{ color: palette.muted, fontSize: 14 }}>
                   Toque na bandeirinha no canto superior direito do card para favoritar palavras aqui.
                 </Text>
               ) : (
-                state.savedIds.map((id) => {
-                  const w = MOBILE_LEXICON.find((item) => item.id === id);
-                  if (!w) return null;
-                  return (
-                    <View
-                      key={id}
-                      style={{
-                        borderTopWidth: 1,
-                        borderTopColor: palette.border,
-                        paddingTop: 8,
-                      }}
-                    >
-                      <Text style={{ color: palette.text, fontSize: 16, fontWeight: "700" }}>
-                        {w.word}
-                      </Text>
-                      <Text style={{ color: palette.muted, fontSize: 13 }}>{w.definition}</Text>
-                    </View>
-                  );
-                })
+                savedWordsList.map((w) => (
+                  <View
+                    key={w.id}
+                    style={{
+                      borderTopWidth: 1,
+                      borderTopColor: palette.border,
+                      paddingTop: 8,
+                    }}
+                  >
+                    <Text style={{ color: palette.text, fontSize: 16, fontWeight: "700" }}>
+                      {w.word}
+                    </Text>
+                    <Text style={{ color: palette.muted, fontSize: 13 }}>{w.definition}</Text>
+                  </View>
+                ))
               )}
             </View>
           </ScrollView>
