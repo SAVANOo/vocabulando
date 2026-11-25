@@ -153,6 +153,12 @@ Este arquivo é o roteiro operacional completo do projeto. Cada cartão foi queb
   - Conector de Dicionários Públicos (`freedictionaryapi.com` + `dicionario-aberto.net` com cache SQLite e SSRF guard) integrado na Web e no Mobile.
   - Web App (`apps/web`) com Onboarding, Feed multi-idioma (`pt-BR`/`en-US`/`es-ES`), PNG export, Quiz/SRS, Coleções, Refinador Lexical, `SafeErrorBoundary` e auditoria WCAG AA (`@axe-core/playwright`).
   - Mobile (`apps/mobile`) com Abertura **I4**, Identidade Dia/Noite, Flashcard 3D, Áudio TTS, 4 sons `.wav`, Jogo de Sinônimos, Desafio de Parônimos, Tutorial Guiado, `expo-sqlite` offline + sync, Notificações agendadas e **Widget Nativo AndroidX Jetpack Glance** (`withVocabulandoWidget.js` compilado com Gradle `:app:compileDebugKotlin`).
+- **Ciclo 11 — Polimento Mobile & Fluxo Pedagógico da Trilha (`apps/mobile`)**:
+  - Seleção explícita de voz **PT-BR** em `speechPtBr.ts` (`StudyFlipCard`, `ListeningChallenge`, `CommuteAudioModal`).
+  - Trilha conectada por curvas Bézier SVG (`LearningPath`) com 5 paletas ilustradas por unidade (`UnitBannerArtwork`) e conclusão individual de nós (`completedNodeIds` no `localDb`).
+  - Sessão guiada em 4 etapas (`LessonSessionRunner`) com barra de progresso no topo, fila de correção de erros no final, feedback não-bloqueante na base e tela de conclusão com XP, precisão e revisões corrigidas.
+  - Mascote editorial refinado (`MascotLikeSvg`) e `CelebrationPopup` ancorado na base sem cobrir alternativas.
+  - Card `SUA META DE HOJE` simplificado (filtros recolhíveis), baralho diário enxuto (`10` cards) e remoção de contadores técnicos na aba Progresso.
 
 ---
 
