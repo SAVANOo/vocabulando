@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from "react-native";
 import type { VocabPalette } from "../theme/palettes";
 
 interface RootNode {
@@ -15,6 +15,19 @@ interface Props {
 }
 
 export function EtymologyNetwork({ word, roots, palette }: Props) {
+  const [selectedPart, setSelectedPart] = useState<string | null>(null);
+  const [expandAnim] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    expandAnim.setValue(0);
+    Animated.timing(expandAnim, {
+      toValue: 1,
+      duration: 360,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [word, expandAnim]);
+
   if (roots.length === 0) return null;
 
   return (
@@ -24,22 +37,62 @@ export function EtymologyNetwork({ word, roots, palette }: Props) {
         <Text style={{ color: palette.accent, fontWeight: "800", fontSize: 13 }}>{word}</Text>
       </View>
 
-      <View style={styles.branches}>
-        {roots.map((r) => (
-          <View key={r.part} style={[styles.branchCard, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-            <Text style={{ color: palette.text, fontWeight: "700", fontSize: 12 }}>
-              {r.part} <Text style={{ color: palette.muted, fontWeight: "400" }}>({r.meaning})</Text>
-            </Text>
-            <View style={styles.relatedRow}>
-              {r.related.map((rel) => (
-                <View key={rel} style={[styles.relChip, { backgroundColor: palette.surfaceAlt }]}>
-                  <Text style={{ color: palette.muted, fontSize: 11 }}>{rel}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        ))}
-      </View>
+      <Animated.View
+        style={[
+          styles.branches,
+          {
+            opacity: expandAnim,
+            transform: [
+              {
+                translateY: expandAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [10, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        {roots.map((r) => {
+          const active = selectedPart === r.part;
+          return (
+            <Pressable
+              key={r.part}
+              accessibilityRole="button"
+              onPress={(e) => {
+                e.stopPropagation();
+                setSelectedPart((prev) => (prev === r.part ? null : r.part));
+              }}
+              style={[
+                styles.branchCard,
+                {
+                  backgroundColor: palette.surface,
+                  borderColor: active ? palette.accent : palette.border,
+                },
+              ]}
+            >
+              <Text style={{ color: palette.text, fontWeight: "700", fontSize: 12 }}>
+                {r.part} <Text style={{ color: palette.muted, fontWeight: "400" }}>({r.meaning})</Text>
+              </Text>
+              <View style={styles.relatedRow}>
+                {r.related.map((rel) => (
+                  <View
+                    key={rel}
+                    style={[
+                      styles.relChip,
+                      { backgroundColor: active ? palette.accentSoft : palette.surfaceAlt },
+                    ]}
+                  >
+                    <Text style={{ color: active ? palette.accent : palette.muted, fontSize: 11, fontWeight: active ? "700" : "400" }}>
+                      {rel}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </Pressable>
+          );
+        })}
+      </Animated.View>
     </View>
   );
 }
