@@ -46,13 +46,13 @@ Este arquivo é o roteiro operacional completo do projeto. Cada cartão foi queb
 
 ---
 
-## Frente de Exploração — Mundo das Animações (Próximo Ciclo)
+## Ciclo 10 — Mundo das Animações Expressivas (Concluído)
 
 | ID | Prioridade | Cartão | Resultado esperado / Critério de verificação |
 | :--- | :--- | :--- | :--- |
-| `AN-01` | P1 | **Mascote Expressivo Reativo (Lottie / Rive / SVG Morph)** | Reações animadas do mascote para acerto consecutivo, dica revelada, erro acolhedor e conclusão da meta |
-| `AN-02` | P1 | **Micro-Confetes & Marcos de Ofensiva (7 / 30 / 100 dias)** | Celebração em tela cheia com partículas físicas ao atingir marcos de sequência no `StreakModal` |
-| `AN-03` | P2 | **Gestos Físicos Contínuos no Card & Árvore Etimológica Animada** | Card acompanhando o dedo em tempo real no swipe e expansão animada dos radicais em `EtymologyNetwork` |
+| `AN-01` | P1 | **Mascote Expressivo Reativo (`MascotMood`)** | `MascotLikeSvg` com 4 expressões (`celebrate`, `combo`, `encourage`, `curious`) integradas ao `CelebrationPopup` |
+| `AN-02` | P1 | **Micro-Confetes & Marcos de Ofensiva (`7 / 30 / 100 dias`)** | Chuva animada de partículas e chama com *spring* no `StreakModal` ao abrir os marcos |
+| `AN-03` | P2 | **Gestos Físicos Contínuos no Card & Árvore Etimológica Animada** | `StudyFlipCard` com `dragTilt` contínuo e `EtymologyNetwork` com expansão animada e seleção de radicais |
 
 ---
 
