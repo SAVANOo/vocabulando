@@ -323,14 +323,46 @@ export function AppIcon({ name, size = 20, color, filled = false }: IconProps) {
   }
 }
 
-export function MascotLikeSvg({ accent, gold }: { accent: string; gold: string }) {
+export type MascotMood = "celebrate" | "combo" | "encourage" | "curious";
+
+export function MascotLikeSvg({
+  accent,
+  gold,
+  mood = "celebrate",
+}: {
+  accent: string;
+  gold: string;
+  mood?: MascotMood;
+}) {
   return (
     <Svg width={64} height={64} viewBox="0 0 64 64" fill="none">
-      {/* Mascote Livro-Sábio dando joinha */}
+      {/* Mascote Livro-Sábio reativo por estado */}
       <Rect x={14} y={14} width={30} height={36} rx={9} fill={accent} fillOpacity={0.18} stroke={accent} strokeWidth={2.2} />
-      <Circle cx={24} cy={28} r={2.5} fill={accent} />
-      <Circle cx={34} cy={28} r={2.5} fill={accent} />
-      <Path d="M24 36c2.5 3 7.5 3 10 0" stroke={accent} strokeWidth={2.2} strokeLinecap="round" />
+      {mood === "combo" ? (
+        <>
+          <Path d="M21 28l3-3 3 3-3 3-3-3ZM31 28l3-3 3 3-3 3-3-3Z" fill={gold} />
+          <Path d="M23 35c3 4 9 4 12 0" stroke={accent} strokeWidth={2.4} strokeLinecap="round" />
+          <Path d="M29 6l1.5 3.5 3.5.5-2.5 2.5.6 3.5L29 14l-3.1 2 .6-3.5L24 10l3.5-.5L29 6Z" fill={gold} />
+        </>
+      ) : mood === "encourage" ? (
+        <>
+          <Circle cx={24} cy={28} r={2.3} fill={accent} />
+          <Path d="M31 28c1.5-1.5 4-1.5 5.5 0" stroke={accent} strokeWidth={2.1} strokeLinecap="round" />
+          <Path d="M25 36c2 2 6 2 8 0" stroke={accent} strokeWidth={2} strokeLinecap="round" />
+        </>
+      ) : mood === "curious" ? (
+        <>
+          <Circle cx={24} cy={27} r={2.5} fill={accent} />
+          <Circle cx={34} cy={27} r={2.5} fill={accent} />
+          <Circle cx={29} cy={37} r={2.2} stroke={accent} strokeWidth={2} />
+        </>
+      ) : (
+        <>
+          <Circle cx={24} cy={28} r={2.5} fill={accent} />
+          <Circle cx={34} cy={28} r={2.5} fill={accent} />
+          <Path d="M24 36c2.5 3 7.5 3 10 0" stroke={accent} strokeWidth={2.2} strokeLinecap="round" />
+        </>
+      )}
       {/* Mão dando like */}
       <Path
         d="M46 34h5a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-5V34Zm0 0l2-7a2 2 0 0 1 3.8.6L51 34"

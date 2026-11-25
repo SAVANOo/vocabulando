@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from "react-native";
 import type { VocabPalette } from "../theme/palettes";
-import { AppIcon, MascotLikeSvg } from "./AppIcon";
+import { AppIcon, MascotLikeSvg, type MascotMood } from "./AppIcon";
 
 interface Props {
   visible: boolean;
   xp: number;
   title: string;
   subtitle?: string;
+  mood?: MascotMood;
   palette: VocabPalette;
   onDismiss: () => void;
 }
@@ -23,7 +24,8 @@ const BURST_VECTORS = [
   { x: -78, y: 0 },
 ];
 
-export function CelebrationPopup({ visible, xp, title, subtitle, palette, onDismiss }: Props) {
+export function CelebrationPopup({ visible, xp, title, subtitle, mood, palette, onDismiss }: Props) {
+  const effectiveMood: MascotMood = mood ?? (xp >= 20 ? "combo" : "celebrate");
   const [scale] = useState(() => new Animated.Value(0.6));
   const [opacity] = useState(() => new Animated.Value(0));
   const [burst] = useState(() => new Animated.Value(0));
@@ -94,7 +96,7 @@ export function CelebrationPopup({ visible, xp, title, subtitle, palette, onDism
             },
           ]}
         >
-          <MascotLikeSvg accent={palette.accent} gold={palette.gold} />
+          <MascotLikeSvg accent={palette.accent} gold={palette.gold} mood={effectiveMood} />
           <Text style={[styles.title, { color: palette.text }]}>{title}</Text>
           {subtitle && (
             <Text style={[styles.subtitle, { color: palette.muted }]}>{subtitle}</Text>
