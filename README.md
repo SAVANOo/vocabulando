@@ -1,82 +1,88 @@
+<div align="center">
+
+<img src="apps/mobile/assets/logo.png" alt="Logo do Vocabulando" width="92" />
+
 # Vocabulando
 
-> **Beleza contemplativa na superfície; motor cognitivo de retenção por baixo.**
+### *Domine novas palavras todos os dias — com leveza editorial e ciência de retenção.*
 
-Aplicativo multiplataforma (Mobile Nativo-First em **React Native / Expo** + **Web App** em React/Vite + **API Hardened** em Node.js) focado no ensino diário de novas palavras e expansão de repertório linguístico em Português (preparado para multi-idioma). Une a leveza editorial de um flashcard minimalista à retenção baseada em ciência cognitiva (**SRS**), **ofensiva gentil** e **Widgets nativos**.
+[![Release](https://img.shields.io/badge/release-v1.0.0-4E9F76?style=for-the-badge)](https://github.com/SAVANOo/vocabulando/releases)
+[![Android](https://img.shields.io/badge/Android-APK%20arm64--v8a-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/SAVANOo/vocabulando/releases)
+[![Offline First](https://img.shields.io/badge/Offline--First-SQLite%2010k%20palavras-1E242B?style=for-the-badge)](apps/mobile/release-manifest.json)
+[![React Native](https://img.shields.io/badge/Expo%20%2F%20React%20Native-Mobile%20%2B%20Web-0F172A?style=for-the-badge&logo=react)](apps/mobile)
 
----
+<br />
 
-## Por que o Vocabulando? (Diferenciais & Ganhos)
+<img src="docs/assets/vocabulando-showcase.jpg" alt="Demonstração do Vocabulando no Android: Card 3D e Trilha de Aprendizado" width="100%" />
 
-- **Foco sem Poluição (*Progressive Disclosure*):** frente do card limpa (palavra, fonética IPA, pronúncia falada e 1 definição curta); ao tocar, o card vira em **3D** revelando exemplo real, etimologia visual e sinônimos por contexto.
-- **Retenção Real sem Fadiga:** algoritmo de Repetição Espaçada (**SRS**) aliado a ofensivas leves (*3 palavras ou 1 desafio por dia*) com **Escudo de Pausa (*Freeze*)** — sem punição com "vidas" nem paywall bloqueante.
-- **Prática Ativa & Nuance:** **Jogo de Sinônimos**, **Quiz Contextual**, **Desafio de Parônimos** (*ratificar vs. retificar*, *iminente vs. eminente*) e **Refinador Lexical** na Web.
-- **Offline-First & Privacidade (LGPD):** banco local `expo-sqlite` no celular com fila de eventos idempotentes, cache de 14 dias para **Widgets AndroidX (`Jetpack Glance`)** e **iOS (`WidgetKit`)**, zero vazamento de stack traces (`SafeErrorBoundary`) e exportação/exclusão LGPD.
-- **Sem Custo de IA Obrigatória:** conector de **Dicionários Públicos** (`freedictionaryapi.com` + `dicionario-aberto.net`) com cache em SQLite e fallback determinístico local.
-
----
-
-## Principais Funcionalidades
-
-- **Mobile (`apps/mobile`):** Abertura **I4**, temas **Dia (*Sálvia & Papel*) / Noite (*Noturno Suave*)**, Modo Noturno Automático, Onboarding personalizado (com dedicação de 2/3/5 palavras), Tutorial Guiado, Flashcard 3D com swipe contínuo + áudio na palavra e na frase, **Modo Trajeto (áudio mãos-livres)**, **Trilha Infinita (`LearningPath`)** com 10 atividades (Escuta, Sinônimos, Substitua o Genérico, Escrita, Use na Sua Frase, Radar de Confusão, Parônimos, Desafio 60s e Revisão), **Importador de Leituras**, **Biblioteca Ex-Libris**, `expo-sqlite` com **10.000 palavras PT-BR** em pacotes temáticos + Sync Bidirecional e **Widget AndroidX (`Jetpack Glance`) interativo** ("Já sei ✓" / "Outra ↻").
-- **Web (`apps/web`):** Feed por trilhas, seletor multi-idioma (`pt-BR`, `en-US`, `es-ES`), busca em Dicionários Públicos, geração de card **PNG 1080×1080**, Micro-Quiz & Revisão, Coleções personalizadas, Refinador Lexical, **Conta (`Register`/`Login` com `scrypt`) + LGPD** e **Painel Admin (RBAC)** com métricas do acervo (10k palavras / 60k slots).
-- **API (`apps/api`):** HTTP *hardened* com `node:sqlite`, **JWT HS256** (*fail-fast* em produção), `scrypt`, namespace `/api/admin/*` (`403` não-admin), validação estrita **Zod**, rate limit com *eviction*, SSRF guard, `/api/packs/:theme`, `/api/me/sync`, telemetria (`analytics_events`) e logger JSONL único com `X-Request-Id`.
+</div>
 
 ---
 
-## Requisitos para Rodar Localmente
+## ✨ O que é o Vocabulando?
 
-- **API, Domínio & Web:**
-  - **Node.js 22+** (usa `node:sqlite` e `node:test` nativos)
-  - **Google Chrome ou Edge** (para suíte E2E + auditoria WCAG AA via `@axe-core/playwright`)
-- **Mobile Nativo Android (Widgets Jetpack Glance):**
-  - **Java JDK 17** (`JAVA_HOME`)
-  - **Android Studio + Android SDK** (`ANDROID_HOME` + `platform-tools` e `emulator` no `Path`)
-- **iOS (`WidgetKit`):** no Windows exige **EAS Build** (`eas-cli`) na nuvem da Expo.
+O **Vocabulando** transforma o hábito de ampliar seu vocabulário em uma experiência visual limpa, rápida e viciante — **sem poluição, sem "vidas" punitivas e funcionando 100% offline**.
+
+Em poucos minutos por dia, você descobre palavras novas em Português, ouve a pronúncia natural em **PT-BR**, explora a origem etimológica e consolida tudo em sessões guiadas com repetição espaçada (**SRS**).
 
 ---
 
-## Instalação e Primeiro Uso
+## 🎯 Destaques da Experiência
 
-1. Instale as dependências do monorepo na raiz:
-   ```powershell
-   npm.cmd install
-   ```
-2. Verifique a saúde do ambiente:
-   ```powershell
-   npm.cmd run doctor
-   ```
-3. **Subir tudo com 1 clique** (API `4180` + Web `5180` + Expo Metro `8081 --android`):
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File scripts/launch-vocabulando.ps1
-   ```
-   *(Ou use o atalho **Vocabulando** na Área de Trabalho.)*
-4. **Instalar a Development Build nativa com o Widget AndroidX no Emulador:**
-   ```powershell
-   cd apps/mobile
-   npx.cmd expo run:android
-   ```
-
----
-
-## Esteira de Qualidade & Testes
-
-| Comando | Descrição |
+| Recurso | Como funciona na prática |
 | :--- | :--- |
-| `npm.cmd run doctor` | Diagnóstico de ambiente (`0` OK, `1` avisos, `2` bloqueante) |
+| 🃏 **Card 3D Focado** | Frente limpa com palavra, fonética IPA, áudio **PT-BR** e definição direta. Vire o card para explorar frase de contexto, rede etimológica e sinônimos. |
+| 🗺️ **Trilha Conectada por Unidades** | Progrida passo a passo por unidades temáticas ilustradas, com barra de acompanhamento, fila de **correção de erros no final** e resumo com XP e precisão. |
+| 🎧 **Modo Trajeto (Mãos-Livres)** | Ouça palavras, definições e exemplos em sequência enquanto caminha ou dirige. |
+| 📱 **Widget Nativo na Tela Inicial** | Widget Android (*Jetpack Glance*) com palavra do dia e ações rápidas sem nem abrir o app. |
+| 🪶 **Ofensiva Gentil** | Metas leves configuráveis (2, 3 ou 5 palavras/dia) com **Escudo de Pausa** automático para dias corridos. |
+| 📚 **Acervo Offline + Dicionário** | Base local em SQLite com **10.000 palavras**, busca instantânea, importador de leituras e estante de favoritas. |
+| 🌐 **Versão Web + Refinador Lexical** | Feed multi-idioma (`pt-BR`, `en-US`, `es-ES`), exportação de cards em PNG 1080×1080, coleções e refinador de texto. |
+
+---
+
+## 📲 Download (Android v1.0.0)
+
+- Baixe o APK oficial assinado (`arm64-v8a`) na aba **[Releases do GitHub](https://github.com/SAVANOo/vocabulando/releases)**.
+- Metadados e `SHA-256` da versão para distribuição em loja própria: [`apps/mobile/release-manifest.json`](apps/mobile/release-manifest.json).
+
+---
+
+<details>
+<summary>🛠️ <strong>Detalhes Técnicos, Arquitetura & Como Rodar Localmente</strong></summary>
+
+### Arquitetura do Monorepo
+- `apps/mobile` — App nativo React Native / Expo + SQLite offline + Widget Android (*Jetpack Glance*)
+- `apps/web` — Web App React + Vite (WCAG AA auditado via `@axe-core/playwright`)
+- `apps/api` — API Node.js com `node:sqlite`, autenticação `JWT HS256` + `scrypt`, RBAC admin e sync offline
+- `packages/domain` — Regras puras de SRS, ofensivas, ranks, validação Zod e geradores de quiz
+
+### Requisitos
+- **Node.js 22+** (para API, Domínio, Web e testes)
+- **Java JDK 17+** e **Android SDK** (para compilar o APK Android nativo)
+
+### Rodar localmente
+```powershell
+npm.cmd install
+npm.cmd run doctor
+powershell -ExecutionPolicy Bypass -File scripts/launch-vocabulando.ps1
+```
+
+### Comandos de Qualidade & Testes
+| Comando | O que valida |
+| :--- | :--- |
 | `npm.cmd run lint` | Análise estática `oxlint` (`0` warnings / `0` errors) |
 | `npm.cmd run typecheck` | Verificação estrita TypeScript (`tsc --noEmit`) |
-| `npm.cmd run build` | Typecheck + bundle de produção Vite |
-| `npm.cmd run test:unit` | Testes unitários (Domínio, SRS, Hábitos, JWT, Léxico, API+SQLite isolado) |
-| `npm.cmd run test:e2e:isolated` | `smoke.mjs` + `verify-features.mjs` contra banco temporário isolado |
-| `npm.cmd run test:e2e:browser` | Suíte Playwright no Chrome + auditoria WCAG AA (`@axe-core/playwright`) |
+| `npm.cmd run build` | Typecheck + bundle de produção Web |
+| `npm.cmd run test:unit` | Suíte unitária (Domínio, SRS, Hábitos, JWT, Léxico, API+SQLite) |
+| `npm.cmd run test:e2e:isolated` | Smoke & feature verification em banco temporário isolado |
+| `npm.cmd run test:e2e:browser` | Playwright E2E + auditoria de acessibilidade WCAG AA |
 
----
-
-## Documentação Complementar
-
-- [Guia Operacional & Variáveis de Ambiente](docs/operacao.md)
+### Documentação Interna
 - [Arquitetura do Projeto](docs/architecture.md)
-- [Segurança e Qualidade (Regras Inegociáveis)](docs/security-and-quality.md)
+- [Guia Operacional & Variáveis de Ambiente](docs/operacao.md)
+- [Segurança e Qualidade](docs/security-and-quality.md)
 - [Kanban Operacional](docs/kanban.md)
-- [Backlog Exploratório (Melhoria Contínua)](docs/backlog-exploratorio.md)
+- [Backlog Exploratório](docs/backlog-exploratorio.md)
+
+</details>
