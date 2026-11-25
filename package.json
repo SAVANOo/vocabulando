@@ -1,0 +1,30 @@
+{
+  "name": "vocabulando",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:api": "node apps/api/src/server.mjs",
+    "dev:web": "npm --workspace=@vocabulando/web run dev",
+    "build": "npm run typecheck && npm --workspace=@vocabulando/web run build",
+    "lint": "oxlint packages apps scripts tests",
+    "typecheck": "tsc -p packages/domain/tsconfig.json --noEmit && tsc -p apps/api/tsconfig.json --noEmit && tsc -p apps/web/tsconfig.json --noEmit",
+    "doctor": "node scripts/doctor.mjs",
+    "test:unit": "node --test tests/unit/*.test.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "verify": "node scripts/verify-features.mjs",
+    "test:e2e:isolated": "node scripts/test-e2e-isolated.mjs",
+    "test:e2e:browser": "node scripts/test-browser-e2e.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^24.0.0",
+    "oxlint": "^1.0.0",
+    "typescript": "^5.8.0"
+  }
+}
