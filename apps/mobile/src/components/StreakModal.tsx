@@ -1,8 +1,16 @@
-import React from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import type { HabitState } from "@vocabulando/domain";
 import type { VocabPalette } from "../theme/palettes";
 import { AppIcon } from "./AppIcon";
+
+const CONFETTI_DROPS = [
+  { left: "10%", delay: 0, drift: -14 },
+  { left: "26%", delay: 80, drift: 18 },
+  { left: "46%", delay: 40, drift: -10 },
+  { left: "68%", delay: 120, drift: 16 },
+  { left: "84%", delay: 60, drift: -18 },
+];
 
 interface Props {
   visible: boolean;
@@ -25,7 +33,26 @@ export function StreakModal({
   studiedCount,
   onClose,
 }: Props) {
+  const [flameScale] = useState(() => new Animated.Value(0.6));
+  const [confettiAnim] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    if (!visible) return;
+    flameScale.setValue(0.6);
+    confettiAnim.setValue(0);
+    Animated.parallel([
+      Animated.spring(flameScale, { toValue: 1, friction: 5, tension: 85, useNativeDriver: true }),
+      Animated.timing(confettiAnim, {
+        toValue: 1,
+        duration: 1400,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [visible, flameScale, confettiAnim]);
+
   const pct = Math.min(100, Math.round((habit.todayWordsViewed / Math.max(1, dailyGoalWords)) * 100));
+  const hasMilestone = habit.currentStreak >= 1;
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -44,10 +71,29 @@ export function StreakModal({
           </View>
 
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-            <View style={[styles.heroCard, { backgroundColor: palette.surface, borderColor: palette.gold }]}>
-              <View style={[styles.flameCircle, { backgroundColor: palette.accentSoft }]}>
+            <View style={[styles.heroCard, { backgroundColor: palette.surface, borderColor: palette.gold, overflow: "hidden" }]}>
+              {hasMilestone &&
+                CONFETTI_DROPS.map((drop, i) => (
+                  <Animated.View
+                    key={i}
+                    pointerEvents="none"
+                    style={{
+                      position: "absolute",
+                      top: 8,
+                      left: drop.left as `${number}%`,
+                      opacity: confettiAnim.interpolate({ inputRange: [0, 0.2, 0.85, 1], outputRange: [0, 1, 1, 0] }),
+                      transform: [
+                        { translateY: confettiAnim.interpolate({ inputRange: [0, 1], outputRange: [-10, 110] }) },
+                        { translateX: confettiAnim.interpolate({ inputRange: [0, 1], outputRange: [0, drop.drift] }) },
+                      ],
+                    }}
+                  >
+                    <AppIcon name="star" size={13} color={i % 2 === 0 ? palette.gold : palette.accent} filled />
+                  </Animated.View>
+                ))}
+              <Animated.View style={[styles.flameCircle, { backgroundColor: palette.accentSoft, transform: [{ scale: flameScale }] }]}>
                 <AppIcon name="flame" size={40} color={palette.gold} filled />
-              </View>
+              </Animated.View>
               <Text style={{ color: palette.text, fontSize: 34, fontWeight: "800" }}>
                 {habit.currentStreak} {habit.currentStreak === 1 ? "dia" : "dias"}
               </Text>
