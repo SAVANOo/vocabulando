@@ -2,7 +2,7 @@
   "expo": {
     "name": "Vocabulando",
     "slug": "vocabulando",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "icon": "./assets/logo.png",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
@@ -17,6 +17,7 @@
     },
     "android": {
       "package": "app.vocabulando",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#0b0c10"
       }
