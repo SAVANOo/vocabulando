@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import * as Speech from "expo-speech";
 import type { MobileWordEntry } from "../data/mobileLexicon";
 import type { VocabPalette } from "../theme/palettes";
+import { speakPtBr } from "../utils/speechPtBr";
 import { AppIcon } from "./AppIcon";
 
 interface Props {
@@ -28,15 +29,11 @@ export function CommuteAudioModal({ visible, words, palette, onClose }: Props) {
   function speakCurrent(idx: number) {
     const item = words[idx % Math.max(1, words.length)];
     if (!item) return;
-    setPlaying(true);
     const script = `${item.word}. ${item.definition}. Exemplo: ${item.example}`;
-    Speech.speak(script, {
-      language: "pt-BR",
+    void speakPtBr(script, {
       rate,
-      onDone: () => {
-        setPlaying(false);
-      },
-      onStopped: () => setPlaying(false),
+      onStart: () => setPlaying(true),
+      onDone: () => setPlaying(false),
       onError: () => setPlaying(false),
     });
   }

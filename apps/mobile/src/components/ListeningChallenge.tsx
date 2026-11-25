@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, Vibration, View } from "react-native";
-import * as Speech from "expo-speech";
 import { buildMixedPracticeQueue } from "@vocabulando/domain";
 import { MOBILE_LEXICON, type MobileWordEntry } from "../data/mobileLexicon";
 import type { VocabPalette } from "../theme/palettes";
 import { playUiSound } from "../utils/soundEffects";
+import { speakPtBr } from "../utils/speechPtBr";
 import { AppIcon } from "./AppIcon";
 
 interface Props {
@@ -47,23 +47,15 @@ export function ListeningChallenge({
 
   async function playAudio() {
     Vibration.vibrate(6);
-    try {
-      await Speech.stop();
-      setSpeaking(true);
-      Speech.speak(target.word, {
-        language: "pt-BR",
-        rate: 0.85,
-        onDone: () => setSpeaking(false),
-        onStopped: () => setSpeaking(false),
-        onError: () => {
-          setSpeaking(false);
-          setShowIpa(true);
-        },
-      });
-    } catch {
-      setSpeaking(false);
-      setShowIpa(true);
-    }
+    await speakPtBr(target.word, {
+      rate: 0.85,
+      onStart: () => setSpeaking(true),
+      onDone: () => setSpeaking(false),
+      onError: () => {
+        setSpeaking(false);
+        setShowIpa(true);
+      },
+    });
   }
 
   function handlePick(opt: string) {
