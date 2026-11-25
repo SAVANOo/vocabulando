@@ -2,7 +2,7 @@ import * as SQLite from "expo-sqlite";
 import type { DifficultyLevel, HabitState, SrsCardState, TrackCategory, UserEvent } from "@vocabulando/domain";
 import { createInitialHabitState } from "@vocabulando/domain";
 import type { UserPreferences } from "../components/OnboardingFlow";
-import type { MobileWordEntry } from "../data/mobileLexicon";
+import { MOBILE_LEXICON, type MobileWordEntry } from "../data/mobileLexicon";
 import type { ThemeMode } from "../theme/palettes";
 
 export interface PersistedMobileState {
@@ -16,6 +16,7 @@ export interface PersistedMobileState {
   habit: HabitState;
   savedIds: string[];
   studiedIds: string[];
+  completedNodeIds: string[];
   srsCards: Record<string, SrsCardState>;
   quizTotal: number;
   quizCorrect: number;
@@ -24,7 +25,7 @@ export interface PersistedMobileState {
 
 const DEFAULT_STATE: PersistedMobileState = {
   prefs: {
-    userName: "Sávio",
+    userName: "",
     goal: "carreira",
     tracks: ["essencial-culto", "comunicacao-executiva"],
     difficulty: "intermediario",
@@ -39,6 +40,7 @@ const DEFAULT_STATE: PersistedMobileState = {
   habit: createInitialHabitState(),
   savedIds: [],
   studiedIds: [],
+  completedNodeIds: [],
   srsCards: {},
   quizTotal: 0,
   quizCorrect: 0,
@@ -428,6 +430,8 @@ export function queryLocalLexicon(options: {
       pos: string;
       category: TrackCategory;
       category_label: string;
+      theme?: string | null;
+      theme_label?: string | null;
       difficulty: DifficultyLevel;
       definition: string;
       example: string;
@@ -445,6 +449,8 @@ export function queryLocalLexicon(options: {
         pos: r.pos,
         category: r.category,
         categoryLabel: r.category_label,
+        theme: r.theme ?? undefined,
+        themeLabel: r.theme_label ?? undefined,
         difficulty: r.difficulty,
         register: "neutro",
         registerScore: 3,
@@ -458,4 +464,86 @@ export function queryLocalLexicon(options: {
   } catch {
     return [];
   }
+}
+
+export function getLocalWordsByIds(ids: string[]): MobileWordEntry[] {
+  if (ids.length === 0) return [];
+  const byId = new Map<string, MobileWordEntry>();
+  for (const item of MOBILE_LEXICON) {
+    if (ids.includes(item.id)) byId.set(item.id, item);
+  }
+  try {
+    const db = getDb();
+    if (db) {
+      const placeholders = ids.map(() => "?").join(", ");
+      const rows = db.getAllSync<{
+        id: string;
+        word: string;
+        ipa: string;
+        pos: string;
+        category: TrackCategory;
+        category_label: string;
+        theme?: string | null;
+        theme_label?: string | null;
+        difficulty: DifficultyLevel;
+        definition: string;
+        example: string;
+        etymology: string;
+        roots_json: string;
+        synonyms_json: string;
+      }>(`SELECT * FROM lexicon_words WHERE id IN (${placeholders})`, ids);
+      for (const r of rows) {
+        const syns = JSON.parse(r.synonyms_json || "[]") as string[];
+        byId.set(r.id, {
+          id: r.id,
+          word: r.word,
+          ipa: r.ipa,
+          pos: r.pos,
+          category: r.category,
+          categoryLabel: r.category_label,
+          theme: r.theme ?? undefined,
+          themeLabel: r.theme_label ?? undefined,
+          difficulty: r.difficulty,
+          register: "neutro",
+          registerScore: 3,
+          definition: r.definition,
+          example: r.example,
+          etymology: r.etymology,
+          roots: JSON.parse(r.roots_json || "[]") as Array<{ part: string; meaning: string; related: string[] }>,
+          synonyms: syns.map((s) => ({ word: s, register: "neutro" as const, note: "Sinônimo relacionado" })),
+        });
+      }
+    }
+  } catch {
+    // Fallback to MOBILE_LEXICON matches only
+  }
+  return ids.map((id) => byId.get(id)).filter((item): item is MobileWordEntry => Boolean(item));
+}
+
+export function getLocalTrackCounts(studiedIds: string[] = []): Record<string, { total: number; done: number }> {
+  const out: Record<string, { total: number; done: number }> = {};
+  try {
+    const db = getDb();
+    if (!db) return out;
+    const rows = db.getAllSync<{ category: string; c: number }>(
+      "SELECT category, COUNT(*) AS c FROM lexicon_words GROUP BY category",
+    );
+    for (const r of rows) {
+      out[r.category] = { total: r.c, done: 0 };
+    }
+    if (studiedIds.length > 0) {
+      const placeholders = studiedIds.map(() => "?").join(", ");
+      const doneRows = db.getAllSync<{ category: string; c: number }>(
+        `SELECT category, COUNT(*) AS c FROM lexicon_words WHERE id IN (${placeholders}) GROUP BY category`,
+        studiedIds,
+      );
+      for (const r of doneRows) {
+        if (!out[r.category]) out[r.category] = { total: r.c, done: 0 };
+        out[r.category]!.done = r.c;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return out;
 }
