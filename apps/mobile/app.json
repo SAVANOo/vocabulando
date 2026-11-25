@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Vocabulando",
+    "slug": "vocabulando",
+    "version": "0.1.0",
+    "icon": "./assets/logo.png",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "./plugins/withVocabulandoWidget"
+    ],
+    "ios": {
+      "bundleIdentifier": "app.vocabulando",
+      "entitlements": {
+        "com.apple.security.application-groups": ["group.app.vocabulando.shared"]
+      }
+    },
+    "android": {
+      "package": "app.vocabulando",
+      "adaptiveIcon": {
+        "backgroundColor": "#0b0c10"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d5777aed-396b-4c3e-bdb3-524b2802148a"
+      }
+    }
+  }
+}
