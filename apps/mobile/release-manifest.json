@@ -1,6 +1,7 @@
 {
   "packageId": "app.vocabulando",
   "name": "Vocabulando",
+  "tagline": "Domine novas palavras todos os dias — 100% offline",
   "versionName": "1.0.0",
   "versionCode": 1,
   "minSdk": 24,
