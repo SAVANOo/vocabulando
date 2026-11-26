@@ -7,6 +7,8 @@
   "targetSdk": 36,
   "abi": "arm64-v8a",
   "apkFileName": "vocabulando-v1.0.0-arm64-v8a.apk",
+  "apkUrl": "https://github.com/SAVANOo/vocabulando/releases/download/v1.0.0/vocabulando-v1.0.0-arm64-v8a.apk",
+  "iconUrl": "https://raw.githubusercontent.com/SAVANOo/vocabulando/main/apps/mobile/assets/logo.png",
   "sizeBytes": 27350406,
   "sha256": "DFF494A2FA9FED150EE20D1273ED48019080B3823F0F2F58C0819B870A0CE4E3",
   "releasedAt": "2026-11-25T21:37:55Z",
