@@ -9,7 +9,7 @@
 
 $ErrorActionPreference = "Stop"
 $root = Resolve-Path (Join-Path $PSScriptRoot "..")
-$appJson = Get-Content (Join-Path $root "apps/mobile/app.json") -Raw | ConvertFrom-Json
+$appJson = Get-Content (Join-Path $root "apps/mobile/app.json") -Raw -Encoding UTF8 | ConvertFrom-Json
 $versionName = [string]$appJson.expo.version
 $versionCode = [int]$appJson.expo.android.versionCode
 $packageId = [string]$appJson.expo.android.package
@@ -47,7 +47,7 @@ $manifestPath = Join-Path $root "apps/mobile/release-manifest.json"
 $prevChangelog = @("Atualizacao $tag")
 $tagline = "Domine novas palavras todos os dias — 100% offline"
 if (Test-Path $manifestPath) {
-  $prev = Get-Content $manifestPath -Raw | ConvertFrom-Json
+  $prev = Get-Content $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
   if ($prev.changelog) { $prevChangelog = @($prev.changelog) }
   if ($prev.tagline) { $tagline = [string]$prev.tagline }
 }

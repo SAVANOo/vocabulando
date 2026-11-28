@@ -1,22 +1,21 @@
 {
-    "packageId":  "app.vocabulando",
-    "name":  "Vocabulando",
-    "tagline":  "Domine novas palavras todos os dias Ã¢â‚¬â€ 100% offline",
-    "versionName":  "1.0.1",
-    "versionCode":  2,
-    "minSdk":  24,
-    "targetSdk":  36,
-    "abi":  "arm64-v8a",
-    "apkFileName":  "vocabulando-v1.0.1-arm64-v8a.apk",
-    "apkUrl":  "https://github.com/SAVANOo/vocabulando/releases/download/v1.0.1/vocabulando-v1.0.1-arm64-v8a.apk",
-    "iconUrl":  "https://raw.githubusercontent.com/SAVANOo/vocabulando/main/apps/mobile/assets/logo.png",
-    "sizeBytes":  28040321,
-    "sha256":  "F93FC4328BD452E485659CFA82F690F572B53CDF177966E2FF3D353BBE683D01",
-    "releasedAt":  "2026-11-28T03:05:16Z",
-    "changelog":  [
-                      "LanÃƒÂ§amento inicial v1.0.0 com baralho diÃƒÂ¡rio de 10 cards, ÃƒÂ¡udio PT-BR e card 3D",
-                      "Trilha interligada por unidades ilustradas com bloqueio progressivo",
-                      "SessÃƒÂµes em 4 etapas com barra de progresso, correÃƒÂ§ÃƒÂ£o de erros e resumo de XP",
-                      "PersistÃƒÂªncia offline em SQLite, busca no dicionÃƒÂ¡rio e widget Android"
-                  ]
+  "packageId": "app.vocabulando",
+  "name": "Vocabulando",
+  "tagline": "Domine novas palavras todos os dias — 100% offline",
+  "versionName": "1.0.1",
+  "versionCode": 2,
+  "minSdk": 24,
+  "targetSdk": 36,
+  "abi": "arm64-v8a",
+  "apkFileName": "vocabulando-v1.0.1-arm64-v8a.apk",
+  "apkUrl": "https://github.com/SAVANOo/vocabulando/releases/download/v1.0.1/vocabulando-v1.0.1-arm64-v8a.apk",
+  "iconUrl": "https://raw.githubusercontent.com/SAVANOo/vocabulando/main/apps/mobile/assets/logo.png",
+  "sizeBytes": 28040321,
+  "sha256": "F93FC4328BD452E485659CFA82F690F572B53CDF177966E2FF3D353BBE683D01",
+  "releasedAt": "2026-11-28T03:05:11Z",
+  "changelog": [
+    "Corrige crash na inicialização do build Release (R8 e carregamento offline)",
+    "Baralho diário de 10 cards com áudio PT-BR, card 3D e trilha conectada",
+    "Sessões em 4 etapas com correção de erros e widget Android"
+  ]
 }
