@@ -39,7 +39,23 @@ $versionedApk = Join-Path $releaseDir $apkFileName
 Copy-Item -Force $rawApk $versionedApk
 
 $sizeBytes = (Get-Item $versionedApk).Length
-$sha256 = (Get-FileHash $versionedApk -Algorithm SHA256).Hash
+$sha256 = (Get-FileHash $versionedApk -Algorithm SHA256).Hash.ToLower()
+$signerSha256 = ""
+
+$apksignerCmd = Get-Command apksigner -ErrorAction SilentlyContinue
+if (-not $apksignerCmd) {
+  $sdkRoot = "$env:LOCALAPPDATA\Android\Sdk"
+  $foundSigner = Get-ChildItem (Join-Path $sdkRoot "build-tools") -Recurse -Filter "apksigner.bat" -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1
+  if ($foundSigner) { $apksignerCmd = $foundSigner.FullName }
+}
+if ($apksignerCmd) {
+  $verifyOut = & $apksignerCmd verify --verbose --print-certs $versionedApk 2>&1 | Out-String
+  if ($LASTEXITCODE -ne 0) { throw "Falha na verificacao criptografica (apksigner): $verifyOut" }
+  if ($verifyOut -match 'Signer #1 certificate SHA-256 digest:\s*([a-fA-F0-9]{64})') {
+    $signerSha256 = $Matches[1].ToLower()
+  }
+}
+
 $releasedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 $releaseBaseUrl = "https://github.com/$Repo/releases/download/$tag"
 
@@ -69,6 +85,7 @@ $manifest = [ordered]@{
   releasedAt  = $releasedAt
   changelog   = $prevChangelog
 }
+if ($signerSha256) { $manifest.signerSha256 = $signerSha256 }
 
 $json = $manifest | ConvertTo-Json -Depth 4
 [System.IO.File]::WriteAllText($manifestPath, $json + "`n", [System.Text.UTF8Encoding]::new($false))
