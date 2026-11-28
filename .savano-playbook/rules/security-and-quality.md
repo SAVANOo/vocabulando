@@ -1,5 +1,7 @@
 # Segurança, Qualidade & Definition of Done
 
+**Escopo:** Todos os repositórios do ecossistema Savano.
+
 ## Rule 4.0 — Segurança by Design & Privacidade
 
 - **Rule 4.1 — Zero Segredos no Repositório:** Nunca commitar `.env`, `keystore.properties`, `*.jks`, `*.keystore`, tokens ou credenciais.
@@ -13,7 +15,7 @@
 ## Rule 5.0 — Qualidade, UX & Definition of Done (DoD)
 
 - **Rule 5.1 — Lint & Tipagem Limpos:** Manter 0 erros e 0 warnings no linter (`oxlint`) e typecheck limpo (`tsc --noEmit` com `strict: true`).
-- **Rule 5.2 — Testes em Ambiente Isolado:** Executar testes unitários, smoke e E2E (Playwright) em banco temporário isolado (`DB_PATH`), nunca tocando dados reais, sempre **após a última edição**.
+- **Rule 5.2 — Testes & Diagnóstico em Ambiente Isolado:** Executar testes unitários (`node --test`), `smoke`, `verify` e E2E (`test:e2e:isolated` / Playwright) em banco temporário isolado (`DB_PATH`), nunca tocando dados reais, sempre **após a última edição**. Scripts `doctor` devem operar estritamente em modo **somente leitura**.
 - **Rule 5.3 — Verificação de Build Nativo:** Validar o build nativo (Kotlin/Gradle/Swift) sempre que houver alteração em código ou configuração nativa.
 - **Rule 5.4 — Acessibilidade Web (WCAG AA):** Garantir contraste mínimo `4.5:1` auditado via `@axe-core/playwright`, labels semânticos e navegação por teclado.
 - **Rule 5.5 — UX Mobile (Android/iOS):** Envolver formulários/modais com `KeyboardAvoidingView` + `ScrollView`, evitar `<Pressable>` envolvendo áreas roláveis e configurar TTS explicitamente para `pt-BR`.
