@@ -80,8 +80,12 @@ if ($PublishGitHub) {
   if (-not $gh) {
     throw "GitHub CLI (gh) nao encontrado. Instale com: winget install --id GitHub.cli -e"
   }
-  & gh release view $tag --repo $Repo *> $null
-  if ($LASTEXITCODE -eq 0) {
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  & gh release view $tag --repo $Repo 2>&1 | Out-Null
+  $releaseExists = ($LASTEXITCODE -eq 0)
+  $ErrorActionPreference = $prevEap
+  if ($releaseExists) {
     & gh release upload $tag $versionedApk $manifestPath --repo $Repo --clobber
   } else {
     $notesText = ($prevChangelog | ForEach-Object { "- $_" }) -join "`n"
